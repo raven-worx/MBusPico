@@ -1,0 +1,8 @@
+#pragma once
+
+#cmakedefine UDP_ENABLED
+#cmakedefine UDP_RECEIVER_HOST "@UDP_RECEIVER_HOST@"
+#cmakedefine UDP_RECEIVER_PORT "@UDP_RECEIVER_PORT@"
+
+#cmakedefine HTTP_ENABLED
+
