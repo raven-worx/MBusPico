@@ -7,46 +7,57 @@ set(PICO_SDK_FETCH_FROM_GIT off)
 set(PICO_SDK_FETCH_FROM_GIT_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 set(PICO_SDK_PATH ${CMAKE_CURRENT_LIST_DIR}/pico-sdk)
+set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_LIST_DIR}/FreeRTOS/FreeRTOS-Kernel)
+
+set(PICO_BOARD "pico_w")
 
 # options
-option(UDP_ENABLED "Enable UDP sender" ON)
-cmake_dependent_option(UDP_RECEIVER_HOST "UDP receiver host" "" "UDP_ENABLED" "")
-cmake_dependent_option(UDP_RECEIVER_PORT "UDP receiver port" 0 "UDP_ENABLED" 0)
-
-option(HTTP_ENABLED "Enable HTTP server" ON)
-
-option(MBUS_DEVICE "MBUS device" "KAIFA_MA309M")
-if ("${MBUS_DEVICE}" STREQUAL "KAIFA_MA309M")
-	list(APPEND SOURCES src/devices/kaifa_ma309m.cpp)
-else()
-	message( FATAL_ERROR "Unsupported value for MBUS_DEVICE option: '${MBUS_DEVICE}'" )
-endif()
+include(options.cmake)
 
 # note: this must happen before project()
 include(pico_sdk_import.cmake)
 
-set(TARGETNAME "rpi-mbus_${MBUS_DEVICE}")
+set(TARGETNAME "rpi-mbus")
 project(${TARGETNAME})
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+if (NOT PICO_CYW43_SUPPORTED OR NOT TARGET pico_cyw43_arch) # set by PICO_BOARD=pico_w
+	message(FATAL_ERROR "CYW43 driver not available")
+endif()
+
 # create configuration header file
-configure_file(include/conf.h.in conf.h @ONLY)
+configure_file(include/mbus-rpi.conf.h.in mbus-rpi.conf.h @ONLY)
+
 include_directories(
-	include
 	${CMAKE_CURRENT_BINARY_DIR}
+	include
+	FreeRTOS
 )
 
 add_executable(${TARGETNAME}
 	src/main.cpp
-	${SOURCES}
+	src/wifi.cpp
+	src/uart.cpp
+	src/mbuspi.cpp
+	src/http.cpp
+	src/udp.cpp
+	src/devices/kaifa_ma309m.cpp
 )
 
-add_subdirectory(FreeRTOS)
+include(FreeRTOS/FreeRTOS_Kernel_import.cmake)
+
+target_compile_definitions(${TARGETNAME} PUBLIC
+	PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS=5000
+)
 
 # pull in common dependencies
-target_link_libraries(${TARGETNAME} pico_stdlib freertos)
+target_link_libraries(${TARGETNAME}
+	pico_cyw43_arch_lwip_sys_freertos
+	pico_stdlib
+	FreeRTOS-Kernel-Heap4 # FreeRTOS kernel and dynamic heap
+)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(${TARGETNAME} 1)
