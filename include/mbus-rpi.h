@@ -26,10 +26,12 @@ namespace MBusPi {
 	
 	extern QueueHandle_t xDeviceEventQueue;
 
+#ifdef WIFI_ENABLED
 	namespace Wifi {
 		int Init();
 		void RunTask(void*);
 	}
+#endif
 
 	namespace Device {
 		void Init();

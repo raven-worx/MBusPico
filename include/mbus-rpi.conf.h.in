@@ -1,8 +1,13 @@
 #pragma once
 
+#cmakedefine WIFI_ENABLED
+#cmakedefine WIFI_SSID "@WIFI_SSID@"
+#cmakedefine WIFI_PWD "@WIFI_PWD@"
+#cmakedefine WIFI_HOSTNAME "@WIFI_HOSTNAME@"
+
 #cmakedefine UDP_ENABLED
 #cmakedefine UDP_RECEIVER_HOST "@UDP_RECEIVER_HOST@"
 #cmakedefine UDP_RECEIVER_PORT "@UDP_RECEIVER_PORT@"
 
 #cmakedefine HTTP_ENABLED
-
+#cmakedefine HTTP_SERVER_PORT @HTTP_SERVER_PORT@

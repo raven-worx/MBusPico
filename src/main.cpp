@@ -9,11 +9,13 @@ int main() {
 	
 	MBusPi::Init();
 	
-	TaskHandle_t hWifiTask;
-	xTaskCreate(Wifi::RunTask, "Wifi_Task", 1024, NULL, tskIDLE_PRIORITY+1, &hWifiTask);
+#ifdef WIFI_ENABLED
+	TaskHandle_t handleWifiTask;
+	xTaskCreate(Wifi::RunTask, "WIFI_Task", 1024, NULL, tskIDLE_PRIORITY+1, &handleWifiTask);
 	// we must bind the wifi task to one core (well at least while the init is called)
 	// (note we only do this in NO_SYS mode, because cyw43_arch_freertos takes care of it otherwise)
-	vTaskCoreAffinitySet(hWifiTask, 1);
+	vTaskCoreAffinitySet(handleWifiTask, 1);
+#endif
 	
 	xTaskCreate(Device::RunTask, "Device_Task", 1024, NULL, tskIDLE_PRIORITY+1, NULL);
 
