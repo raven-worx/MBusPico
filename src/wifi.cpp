@@ -11,21 +11,21 @@ char pass[] = "A Password";
 using namespace MBusPi;
 
 int Wifi::Init() {
-	LOG_D("Wifi::Init() called")
+	LOG_D("Wifi::Init() called");
 	// see pico-sdk/lib/cyw43-driver/src/cyw43_country.h
 	if (cyw43_arch_init_with_country(CYW43_COUNTRY_AUSTRIA)) {
-		LOG_E("failed to initialise Wifi")
+		LOG_E("failed to initialise Wifi");
 		return 1;
 	}
-	LOG_I("Wifi initialized")
+	LOG_I("Wifi initialized");
 	
 	cyw43_arch_enable_sta_mode();
-	LOG_I("Wifi STA mode enabled")
+	LOG_I("Wifi STA mode enabled");
 	return 0;
 }
 
 void Wifi::RunTask(void*) {
-	LOG_D("Wifi::RunTask()")
+	LOG_D("Wifi::RunTask()");
 	
 	Wifi::Init();
 	
@@ -62,12 +62,12 @@ void Wifi::RunTask(void*) {
 		}
 		
 		if (doConnect) {
-			LOG_I("Connecting to Wifi '%s'",ssid)
+			LOG_I("Connecting to Wifi '%s'",ssid);
 			if (cyw43_arch_wifi_connect_timeout_ms(ssid, pass, CYW43_AUTH_WPA2_AES_PSK, 10000)) {
-				LOG_E("failed to connect Wifi")
+				LOG_E("failed to connect Wifi");
 			}
 			else {
-				LOG_I("Wifi connected")
+				LOG_I("Wifi connected");
 			}
 		}
 		else {

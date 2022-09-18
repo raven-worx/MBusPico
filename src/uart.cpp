@@ -18,7 +18,7 @@ using namespace MBusPi;
 
 // RX interrupt handler
 static void on_uart_rx() {
-	//LOG_D("UART data ready to read")
+	//LOG_D("UART data ready to read");
 	xMBusData_t d = {0};
 	while (uart_is_readable(UART_ID)) {
 		uint8_t ch = uart_getc(UART_ID);
@@ -35,7 +35,7 @@ static void on_uart_rx() {
 }
 
 void UART::Init() {
-	LOG_D("UART::Init() called")
+	LOG_D("UART::Init() called");
 	
 	// Set up UART with a basic baud rate
 	uart_init(UART_ID, 2400);
@@ -72,6 +72,7 @@ void UART::Init() {
 }
 
 void UART::RunTask(void*) {
+	UART::Init();
 	
 	for (;;) {
 		LOG_D("UART::RunTask()\n");

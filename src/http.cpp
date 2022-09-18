@@ -11,8 +11,10 @@ void HTTP::Init() {
 }
 
 void HTTP::RunTask(void*) {
+	HTTP::Init();
+	
 	while(true){
-		LOG_D("HTTP::RunTask()")
+		LOG_D("HTTP::RunTask()");
 		vTaskDelay(5000);
 	}
 }

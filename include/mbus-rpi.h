@@ -2,6 +2,7 @@
 
 #include <mbus-rpi.conf.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
@@ -56,6 +57,7 @@ namespace MBusPi {
 }
 
 // Logging
+
 #define LOG_NONE  0
 #define LOG_ERROR 1
 #define LOG_INFO  2
@@ -65,20 +67,6 @@ namespace MBusPi {
 # define LOG_LEVEL LOG_DEBUG
 #endif
 
-#if LOG_LEVEL >= LOG_ERROR
-# define LOG_E(MSG, ...) ({printf("[ERROR]\t" MSG "\n", ##__VA_ARGS__); true;});
-#else
-# define LOG_E(MSG, ...)
-#endif
-
-#if LOG_LEVEL >= LOG_INFO
-# define LOG_I(MSG, ...) ({printf("[INFO]\t" MSG "\n", ##__VA_ARGS__); true;});
-#else
-# define LOG_I(MSG, ...)
-#endif
-
-#if LOG_LEVEL >= LOG_DEBUG
-# define LOG_D(MSG, ...) ({printf("[DEBUG]\t" MSG "\n", ##__VA_ARGS__); true;});
-#else
-# define LOG_D(MSG, ...)
-#endif
+void LOG_E(const char* format, ...);
+void LOG_I(const char* format, ...);
+void LOG_D(const char* format, ...);

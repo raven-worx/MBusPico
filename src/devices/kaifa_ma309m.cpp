@@ -5,13 +5,15 @@
 using namespace MBusPi;
 
 void Device::Init() {
-	LOG_D("Device::Init() called - " DEV_NAME)
+	LOG_D("Device::Init() called - " DEV_NAME);
 }
 
 void Device::RunTask(void*) {
+	Device::Init();
+	
 	xMBusData_t data;
 	for (;;) {
-		LOG_D("Device: Check device queue...")
+		LOG_D("Device: Check device queue...");
 		if (xQueueReceive(xDeviceEventQueue, &data, portMAX_DELAY) == pdPASS) 
 		{ 
 			

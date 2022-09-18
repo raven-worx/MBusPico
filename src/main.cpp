@@ -15,24 +15,22 @@ int main() {
 	// (note we only do this in NO_SYS mode, because cyw43_arch_freertos takes care of it otherwise)
 	vTaskCoreAffinitySet(hWifiTask, 1);
 	
-	Device::Init();
 	xTaskCreate(Device::RunTask, "Device_Task", 1024, NULL, tskIDLE_PRIORITY+1, NULL);
 
-	UART::Init();
 	xTaskCreate(UART::RunTask, "UART_Task", 1024, NULL, tskIDLE_PRIORITY+1, NULL);
 
 #ifdef HTTP_ENABLED
-	HTTP::Init();
 	xTaskCreate(HTTP::RunTask, "HTTP_Task", 1024, NULL, tskIDLE_PRIORITY+1, NULL);
 #endif
 
 #ifdef UDP_ENABLED
-	UDP::Init();
 	xTaskCreate(UDP::RunTask, "UDP_Task", 1024, NULL, tskIDLE_PRIORITY+1, NULL);
 #endif
 
 	vTaskStartScheduler();
 
-	LOG_D("EXIT")
+#if LOG_LEVEL >= LOG_DEBUG
+	printf("=== EXIT ===\n");
+#endif
 	return 0;
 }
