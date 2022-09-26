@@ -1,8 +1,10 @@
+option(UPDATE_INTERVAL_S "Value update interval [s]" 10)
+
 # WIFI
 option(WIFI_ENABLED "Connect to Wifi network" ON)
 cmake_dependent_option(WIFI_SSID "Wifi network SSID" "" "WIFI_ENABLED" "")
 cmake_dependent_option(WIFI_PWD "Wifi password" "" "WIFI_ENABLED" "")
-cmake_dependent_option(WIFI_HOSTNAME "Network hostname" "RPiMbus" "WIFI_ENABLED" "")
+cmake_dependent_option(WIFI_HOSTNAME "Network hostname" "MbusPi" "WIFI_ENABLED" "")
 
 # UDP SENDER
 cmake_dependent_option(UDP_ENABLED "Enable UDP sender" ON "WIFI_ENABLED" OFF)

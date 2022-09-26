@@ -40,12 +40,6 @@
  * See http://www.freertos.org/a00110.html
  *----------------------------------------------------------*/
 
-/*SMP*/
-#define configNUM_CORES                         2
-#define configRUN_MULTIPLE_PRIORITIES           1
-#define configUSE_CORE_AFFINITY                 1
-#define configUSE_TASK_PREEMPTION_DISABLE       0
-
 /* Scheduler Related */
 #define configUSE_PREEMPTION                    1
 #define configUSE_TICKLESS_IDLE                 0
@@ -53,7 +47,7 @@
 #define configUSE_TICK_HOOK                     0
 #define configTICK_RATE_HZ                      ( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES                    32
-#define configMINIMAL_STACK_SIZE                ( configSTACK_DEPTH_TYPE ) 256
+#define configMINIMAL_STACK_SIZE                ( configSTACK_DEPTH_TYPE ) 512
 #define configUSE_16_BIT_TICKS                  0
 
 #define configIDLE_SHOULD_YIELD                 1
@@ -114,6 +108,7 @@
 #define configTICK_CORE                         0
 #define configRUN_MULTIPLE_PRIORITIES           1
 #define configUSE_CORE_AFFINITY                 1
+#define configUSE_TASK_PREEMPTION_DISABLE       0
 #endif
 
 /* RP2040 specific */

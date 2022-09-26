@@ -28,22 +28,23 @@ if (NOT PICO_CYW43_SUPPORTED OR NOT TARGET pico_cyw43_arch) # set by PICO_BOARD=
 endif()
 
 # create configuration header file
-configure_file(include/mbus-rpi.conf.h.in mbus-rpi.conf.h @ONLY)
+configure_file(include/mbuspi.conf.h.in mbuspi.conf.h @ONLY)
 
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	include
 	FreeRTOS
+	src/httpparser
 )
 
 add_executable(${TARGETNAME}
-	src/main.cpp
-	src/wifi.cpp
-	src/uart.cpp
-	src/mbuspi.cpp
-	src/http.cpp
-	src/udp.cpp
-	src/devices/kaifa_ma309m.cpp
+	src/main.c
+	src/wifi.c
+	src/uart.c
+	src/mbuspi.c
+	src/http.c
+	src/udp.c
+	src/devices/kaifa_ma309m.c
 )
 
 include(FreeRTOS/FreeRTOS_Kernel_import.cmake)

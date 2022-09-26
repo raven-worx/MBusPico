@@ -5,6 +5,8 @@
 #cmakedefine WIFI_PWD "@WIFI_PWD@"
 #cmakedefine WIFI_HOSTNAME "@WIFI_HOSTNAME@"
 
+#cmakedefine UPDATE_INTERVAL_S "@UPDATE_INTERVAL_S@"
+
 #cmakedefine UDP_ENABLED
 #cmakedefine UDP_RECEIVER_HOST "@UDP_RECEIVER_HOST@"
 #cmakedefine UDP_RECEIVER_PORT "@UDP_RECEIVER_PORT@"

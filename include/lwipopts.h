@@ -13,10 +13,14 @@
 #define DEFAULT_RAW_RECVMBOX_SIZE   8
 #define TCPIP_MBOX_SIZE             8
 #define LWIP_TIMEVAL_PRIVATE        0
+
+#define DEFAULT_UDP_RECVMBOX_SIZE TCPIP_MBOX_SIZE
+#define DEFAULT_TCP_RECVMBOX_SIZE TCPIP_MBOX_SIZE
+#define DEFAULT_ACCEPTMBOX_SIZE TCPIP_MBOX_SIZE
 #endif
 
 #ifndef LWIP_SOCKET
-#define LWIP_SOCKET                 0
+#define LWIP_SOCKET                 1
 #endif
 #if PICO_CYW43_ARCH_POLL
 #define MEM_LIBC_MALLOC             1

@@ -1,13 +1,14 @@
-#include <mbus-rpi.h>
+#include <mbuspi.h>
 #include "semphr.h"
 
-QueueHandle_t MBusPi::xDeviceEventQueue = nullptr;
+#define TAG ""
 
-static SemaphoreHandle_t xValueMutex = nullptr;
-static SemaphoreHandle_t xLogMutex = nullptr;
+QueueHandle_t xDeviceEventQueue = NULL;
 
-void MBusPi::Init() {
-	//LOG_D("MBusPi::Init() called");
+static SemaphoreHandle_t xValueMutex = NULL;
+static SemaphoreHandle_t xLogMutex = NULL;
+
+void mbuspi_init() {
 	xValueMutex =  xSemaphoreCreateBinary();
 	xSemaphoreGive(xValueMutex);
 	
@@ -15,66 +16,70 @@ void MBusPi::Init() {
 	xSemaphoreGive(xLogMutex);
 	
 	xDeviceEventQueue = xQueueCreate(5, sizeof(xMBusData_t));
-	//LOG_D("MBus data queue created");
 }
 
-void MBusPi::GetValue(MBusPi::Value, void*) {
-	LOG_D("MBusPi::GetValue() called");
+size_t mbuspi_get_values_json(char* data_buffer) {
+	size_t data_len = 0;
+	LOG_D(TAG, "mbuspi_get_values_json() called");
 	if (xSemaphoreTake(xValueMutex, portMAX_DELAY) == pdTRUE) {
-		// TODO
+		static const char* data_tmpl = 
+			"{" "\n"
+			"\"value1\": %d," "\n"
+			"\"value2\": %d," "\n"
+			"\"value3\": %d," "\n"
+			"\"value4\": %d," "\n"
+			"\"value5\": %d" "\n"
+			"}"
+		;
+		data_len = snprintf(data_buffer, DATA_BUFFER_SIZE, data_tmpl, 1, 2, 3, 4, 5);
 		xSemaphoreGive(xValueMutex);
 	}
-}
-
-void MBusPi::SetValue(MBusPi::Value, void*) {
-	LOG_D("MBusPi::SetValue() called");
-	if (xSemaphoreTake(xValueMutex, portMAX_DELAY) == pdTRUE) {
-		// TODO
-		xSemaphoreGive(xValueMutex);
-	}
+	return data_len;
 }
 
 // Logging
 
-void LOG_E(const char* format, ...) {
 #if LOG_LEVEL >= LOG_ERROR
+void LOG_E(const char* tag, const char* format, ...) {
 	if (xSemaphoreTake(xLogMutex, portMAX_DELAY) == pdTRUE) {
 		va_list args;
 		va_start (args, format);
 		printf("[ERROR]\t");
+		printf("%s\t", tag);
 		vprintf(format, args);
 		printf("\n");
 		va_end (args);
 		xSemaphoreGive(xLogMutex);
 	}
-#endif
 }
+#endif
 
-void LOG_I(const char* format, ...) {
 #if LOG_LEVEL >= LOG_INFO
+void LOG_I(const char* tag, const char* format, ...) {
 	if (xSemaphoreTake(xLogMutex, portMAX_DELAY) == pdTRUE) {
 		va_list args;
 		va_start (args, format);
 		printf("[INFO]\t");
+		printf("%s\t", tag);
 		vprintf(format, args);
 		printf("\n");
 		va_end (args);
 		xSemaphoreGive(xLogMutex);
 	}
-#endif
 }
+#endif
 
-void LOG_D(const char* format, ...) {
 #if LOG_LEVEL >= LOG_DEBUG
+void LOG_D(const char* tag, const char* format, ...) {
 	if (xSemaphoreTake(xLogMutex, portMAX_DELAY) == pdTRUE) {
 		va_list args;
 		va_start (args, format);
 		printf("[DEBUG]\t");
+		printf("%s\t", tag);
 		vprintf(format, args);
 		printf("\n");
 		va_end (args);
 		xSemaphoreGive(xLogMutex);
 	}
-#endif
 }
-
+#endif
