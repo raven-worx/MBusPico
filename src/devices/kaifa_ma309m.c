@@ -1,4 +1,5 @@
 #include <mbuspi.h>
+#include <mbedtls/gcm.h>
 
 #define TAG "DEVICE"
 

@@ -1,5 +1,9 @@
 #include <mbuspi.h>
-#include "semphr.h"
+#include <semphr.h>
+#include <hardware/watchdog.h>
+#include <hardware/regs/rosc.h>
+#include <hardware/regs/addressmap.h>
+#include <mbedtls_config.h>
 
 #define TAG ""
 
@@ -37,6 +41,29 @@ size_t mbuspi_get_values_json(char* data_buffer) {
 	return data_len;
 }
 
+void mbuspi_reset() {
+	watchdog_enable(1, 1);
+	while(1) {};
+}
+
+// ENTROPY RNG
+#ifdef MBEDTLS_ENTROPY_HARDWARE_ALT
+// based on https://forums.raspberrypi.com/viewtopic.php?t=302960
+int mbedtls_hardware_poll (void *data, unsigned char *output, size_t len, size_t *olen) {
+	int k, i, rnd = 0;
+	volatile uint32_t *rnd_reg=(uint32_t *)(ROSC_BASE + ROSC_RANDOMBIT_OFFSET);
+	for (k = 0; k < 32; k++) {
+		rnd = rnd << 1;
+		rnd = rnd + (0x00000001 & (*rnd_reg));
+	}
+	for (i = 0; i < len; i++) {
+		output[i] = ((unsigned char*)&rnd)[i%sizeof(rnd)];
+	}
+	*olen = len;
+	return 0;
+}
+#endif
+
 // Logging
 
 #if LOG_LEVEL >= LOG_ERROR
@@ -44,8 +71,7 @@ void LOG_E(const char* tag, const char* format, ...) {
 	if (xSemaphoreTake(xLogMutex, portMAX_DELAY) == pdTRUE) {
 		va_list args;
 		va_start (args, format);
-		printf("[ERROR]\t");
-		printf("%s\t", tag);
+		printf("[ERROR]\t%s\t", tag);
 		vprintf(format, args);
 		printf("\n");
 		va_end (args);
@@ -59,8 +85,7 @@ void LOG_I(const char* tag, const char* format, ...) {
 	if (xSemaphoreTake(xLogMutex, portMAX_DELAY) == pdTRUE) {
 		va_list args;
 		va_start (args, format);
-		printf("[INFO]\t");
-		printf("%s\t", tag);
+		printf("[INFO]\t%s\t", tag);
 		vprintf(format, args);
 		printf("\n");
 		va_end (args);
@@ -74,8 +99,7 @@ void LOG_D(const char* tag, const char* format, ...) {
 	if (xSemaphoreTake(xLogMutex, portMAX_DELAY) == pdTRUE) {
 		va_list args;
 		va_start (args, format);
-		printf("[DEBUG]\t");
-		printf("%s\t", tag);
+		printf("[DEBUG]\t%s\t", tag);
 		vprintf(format, args);
 		printf("\n");
 		va_end (args);

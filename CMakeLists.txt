@@ -18,7 +18,7 @@ include(options.cmake)
 include(pico_sdk_import.cmake)
 
 set(TARGETNAME "rpi-mbus")
-project(${TARGETNAME})
+project(${TARGETNAME} VERSION 1.0)
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -34,7 +34,6 @@ include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	include
 	FreeRTOS
-	src/httpparser
 )
 
 add_executable(${TARGETNAME}
@@ -48,6 +47,7 @@ add_executable(${TARGETNAME}
 )
 
 include(FreeRTOS/FreeRTOS_Kernel_import.cmake)
+add_subdirectory(dep)
 
 target_compile_definitions(${TARGETNAME} PUBLIC
 	PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS=5000
@@ -58,6 +58,7 @@ target_link_libraries(${TARGETNAME}
 	pico_cyw43_arch_lwip_sys_freertos
 	pico_stdlib
 	FreeRTOS-Kernel-Heap4 # FreeRTOS kernel and dynamic heap
+	mbedtls_crypto
 )
 
 # enable usb output, disable uart output

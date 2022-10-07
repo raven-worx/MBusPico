@@ -77,7 +77,7 @@ static int send_response(int socket, int statusCode)
 			{
 				const char* response_tmpl = 
 					"HTTP/1.1 200 OK" "\r\n"
-					"Server: " PROJECT_STR "/" VERSION_STR "\r\n"
+					"Server: " PROJECT_NAME "/" PROJECT_VERSION "\r\n"
 					"Content-Length: %d" "\r\n"
 					"Content-Type: application/json" "\r\n"
 					"Connection: close" "\r\n"
@@ -92,7 +92,7 @@ static int send_response(int socket, int statusCode)
 			{
 				const char* response_tmpl = 
 					"HTTP/1.1 400 Bad Request" "\r\n"
-					"Server: " PROJECT_STR "/" VERSION_STR "\r\n"
+					"Server: " PROJECT_NAME "/" PROJECT_VERSION "\r\n"
 					"Content-Length: 0" "\r\n"
 					"Connection: close" "\r\n"
 					;
@@ -103,7 +103,7 @@ static int send_response(int socket, int statusCode)
 			{
 				const char* response_tmpl = 
 					"HTTP/1.1 404 Not Found" "\r\n"
-					"Server: " PROJECT_STR "/" VERSION_STR "\r\n"
+					"Server: " PROJECT_NAME "/" PROJECT_VERSION "\r\n"
 					"Content-Length: 0" "\r\n"
 					"Connection: close" "\r\n"
 					;
@@ -114,7 +114,7 @@ static int send_response(int socket, int statusCode)
 			{
 				const char* response_tmpl = 
 					"HTTP/1.1 405 Not Allowed" "\r\n"
-					"Server: " PROJECT_STR "/" VERSION_STR "\r\n"
+					"Server: " PROJECT_NAME "/" PROJECT_VERSION "\r\n"
 					"Content-Length: 0" "\r\n"
 					"Connection: close" "\r\n"
 					;
@@ -125,7 +125,7 @@ static int send_response(int socket, int statusCode)
 			{
 				const char* response_tmpl = 
 					"HTTP/1.1 406 Not Acceptable" "\r\n"
-					"Server: " PROJECT_STR "/" VERSION_STR "\r\n"
+					"Server: " PROJECT_NAME "/" PROJECT_VERSION "\r\n"
 					"Content-Length: 0" "\r\n"
 					"Connection: close" "\r\n"
 					;
@@ -136,7 +136,7 @@ static int send_response(int socket, int statusCode)
 			{
 				const char* response_tmpl = 
 					"HTTP/1.1 413 Payload Too Large" "\r\n"
-					"Server: " PROJECT_STR "/" VERSION_STR "\r\n"
+					"Server: " PROJECT_NAME "/" PROJECT_VERSION "\r\n"
 					"Content-Length: 0" "\r\n"
 					"Connection: close" "\r\n"
 					;

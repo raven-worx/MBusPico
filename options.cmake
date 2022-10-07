@@ -1,4 +1,5 @@
 option(UPDATE_INTERVAL_S "Value update interval [s]" 10)
+option(DEVICE_KEY "Device encryption key (if required)" "")
 
 # WIFI
 option(WIFI_ENABLED "Connect to Wifi network" ON)

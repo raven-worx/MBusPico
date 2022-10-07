@@ -3,17 +3,11 @@
 #include <mbuspi.conf.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <hardware/regs/rosc.h>
+#include <hardware/regs/addressmap.h>
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
-
-// VERSION
-#define _STR(S) #S
-
-#define PROJECT_STR "MBusPi"
-#define VERSION_MAJ 0
-#define VERSION_MIN 0
-#define VERSION_STR _STR(VERSION_MAJ) "." _STR(VERSION_MIN)
 
 #define DATA_BUFFER_SIZE 	512
 #define MAX_QUEUE_ITEM_SIZE 128
@@ -25,6 +19,7 @@ typedef struct {
 
 void mbuspi_init();
 size_t mbuspi_get_values_json(char* data_buffer);
+void mbuspi_reset();
 	
 extern QueueHandle_t xDeviceEventQueue;
 
