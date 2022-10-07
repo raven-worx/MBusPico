@@ -31,3 +31,4 @@ _ReSharper*/
 packages/
 
 build/*
+pico-sdk/*
