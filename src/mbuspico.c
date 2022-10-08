@@ -1,4 +1,4 @@
-#include <mbuspi.h>
+#include <mbuspico.h>
 #include <semphr.h>
 #include <hardware/watchdog.h>
 #include <hardware/regs/rosc.h>
@@ -12,7 +12,7 @@ QueueHandle_t xDeviceEventQueue = NULL;
 static SemaphoreHandle_t xValueMutex = NULL;
 static SemaphoreHandle_t xLogMutex = NULL;
 
-void mbuspi_init() {
+void mbuspico_init() {
 	xValueMutex =  xSemaphoreCreateBinary();
 	xSemaphoreGive(xValueMutex);
 	
@@ -22,9 +22,9 @@ void mbuspi_init() {
 	xDeviceEventQueue = xQueueCreate(5, sizeof(xMBusData_t));
 }
 
-size_t mbuspi_get_values_json(char* data_buffer) {
+size_t mbuspico_get_values_json(char* data_buffer) {
 	size_t data_len = 0;
-	LOG_D(TAG, "mbuspi_get_values_json() called");
+	MBUSPICO_LOG_D(TAG, "mbuspico_get_values_json() called");
 	if (xSemaphoreTake(xValueMutex, portMAX_DELAY) == pdTRUE) {
 		static const char* data_tmpl = 
 			"{" "\n"
@@ -41,7 +41,7 @@ size_t mbuspi_get_values_json(char* data_buffer) {
 	return data_len;
 }
 
-void mbuspi_reset() {
+void mbuspico_reset() {
 	watchdog_enable(1, 1);
 	while(1) {};
 }
@@ -66,8 +66,8 @@ int mbedtls_hardware_poll (void *data, unsigned char *output, size_t len, size_t
 
 // Logging
 
-#if LOG_LEVEL >= LOG_ERROR
-void LOG_E(const char* tag, const char* format, ...) {
+#if MBUSPICO_LOG_LEVEL >= MBUSPICO_LOG_ERROR
+void MBUSPICO_LOG_E(const char* tag, const char* format, ...) {
 	if (xSemaphoreTake(xLogMutex, portMAX_DELAY) == pdTRUE) {
 		va_list args;
 		va_start (args, format);
@@ -80,8 +80,8 @@ void LOG_E(const char* tag, const char* format, ...) {
 }
 #endif
 
-#if LOG_LEVEL >= LOG_INFO
-void LOG_I(const char* tag, const char* format, ...) {
+#if MBUSPICO_LOG_LEVEL >= MBUSPICO_LOG_INFO
+void MBUSPICO_LOG_I(const char* tag, const char* format, ...) {
 	if (xSemaphoreTake(xLogMutex, portMAX_DELAY) == pdTRUE) {
 		va_list args;
 		va_start (args, format);
@@ -94,8 +94,8 @@ void LOG_I(const char* tag, const char* format, ...) {
 }
 #endif
 
-#if LOG_LEVEL >= LOG_DEBUG
-void LOG_D(const char* tag, const char* format, ...) {
+#if MBUSPICO_LOG_LEVEL >= MBUSPICO_LOG_DEBUG
+void MBUSPICO_LOG_D(const char* tag, const char* format, ...) {
 	if (xSemaphoreTake(xLogMutex, portMAX_DELAY) == pdTRUE) {
 		va_list args;
 		va_start (args, format);

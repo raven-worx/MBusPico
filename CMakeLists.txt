@@ -17,8 +17,8 @@ include(options.cmake)
 # note: this must happen before project()
 include(pico_sdk_import.cmake)
 
-set(TARGETNAME "rpi-mbus")
-project(${TARGETNAME} VERSION 1.0)
+set(TARGETNAME "mbus-pico")
+project(MBusPico VERSION 1.0)
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -28,7 +28,7 @@ if (NOT PICO_CYW43_SUPPORTED OR NOT TARGET pico_cyw43_arch) # set by PICO_BOARD=
 endif()
 
 # create configuration header file
-configure_file(include/mbuspi.conf.h.in mbuspi.conf.h @ONLY)
+configure_file(include/mbuspico.conf.h.in mbuspico.conf.h @ONLY)
 
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
@@ -40,7 +40,7 @@ add_executable(${TARGETNAME}
 	src/main.c
 	src/wifi.c
 	src/uart.c
-	src/mbuspi.c
+	src/mbuspico.c
 	src/http.c
 	src/udp.c
 	src/devices/kaifa_ma309m.c
@@ -50,6 +50,8 @@ include(FreeRTOS/FreeRTOS_Kernel_import.cmake)
 add_subdirectory(dep)
 
 target_compile_definitions(${TARGETNAME} PUBLIC
+	PROJECT_NAME="${PROJECT_NAME}"
+	PROJECT_VERSION="${PROJECT_VERSION}"
 	PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS=5000
 )
 

@@ -1,13 +1,8 @@
 #
 # mbedtls
+# Just building mbedTLS crypto lib here. Using the offical CMakeLists results in incompatible binaries
 #
 
-SET(ENABLE_TESTING OFF CACHE BOOL "Enable testing mbedtls")
-
-#file(REAL_PATH "../include" MBEDTLS_CONFIG_DIR BASE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
-
-SET(CMAKE_C_FLAGS "-I${CMAKE_CURRENT_LIST_DIR}/../include -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>'")
-add_subdirectory(mbedtls)
 SET(mbedtls_src_crypto
 	aes.c
 	aesni.c
@@ -83,11 +78,8 @@ SET(mbedtls_src_crypto
 )
 list(TRANSFORM mbedtls_src_crypto PREPEND ${CMAKE_CURRENT_LIST_DIR}/mbedtls/library/)
 
-#SET(CMAKE_C_FLAGS "-I${CMAKE_CURRENT_LIST_DIR}/../include -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>'")
 add_library(mbedtls_crypto STATIC)
 target_sources(mbedtls_crypto PRIVATE ${mbedtls_src_crypto})
 
-#${CMAKE_CURRENT_LIST_DIR}/../include -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>'"
-#target_compile_definitions(mbedtls_crypto PRIVATE MBEDTLS_CONFIG_FILE="mbuspi_mbedtls_config.h")
 set_target_properties(mbedtls_crypto PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_LIST_DIR}/../include -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>'")
 target_include_directories(mbedtls_crypto PUBLIC ${CMAKE_CURRENT_LIST_DIR}/mbedtls/include ${CMAKE_CURRENT_LIST_DIR}/mbedtls/library)

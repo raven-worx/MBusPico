@@ -1,7 +1,6 @@
-#include <mbuspi.h>
-#include "pico/stdlib.h"
-#include "hardware/uart.h"
-#include "hardware/irq.h"
+#include <mbuspico.h>
+#include <hardware/uart.h>
+#include <hardware/irq.h>
 
 #define TAG "UART"
 
@@ -18,7 +17,7 @@
 
 // RX interrupt handler
 static void on_uart_rx() {
-	//LOG_D(TAG, "data ready to read");
+	//MBUSPICO_LOG_D(TAG, "data ready to read");
 	xMBusData_t d = {0};
 	while (uart_is_readable(UART_ID)) {
 		uint8_t ch = uart_getc(UART_ID);
@@ -34,8 +33,8 @@ static void on_uart_rx() {
 	}
 }
 
-static void mbuspi_uart_init() {
-	LOG_D(TAG, "mbuspi_uart_init()");
+static void mbuspico_uart_init() {
+	MBUSPICO_LOG_D(TAG, "mbuspico_uart_init()");
 	
 	// Set up UART with a basic baud rate
 	uart_init(UART_ID, 2400);
@@ -68,13 +67,13 @@ static void mbuspi_uart_init() {
 	// Now enable the UART to send interrupts - RX only
 	uart_set_irq_enables(UART_ID, true, false);
 	
-	LOG_D(TAG, "UART initialized");
+	MBUSPICO_LOG_D(TAG, "UART initialized");
 }
 
-void mbuspi_uart_task(void* arg) {
-	LOG_D(TAG, "mbuspi_uart_task()");
+void mbuspico_uart_task(void* arg) {
+	MBUSPICO_LOG_D(TAG, "mbuspico_uart_task()");
 	
-	mbuspi_uart_init();
+	mbuspico_uart_init();
 	
 	for (;;) {
 		vTaskDelay(5000/portTICK_PERIOD_MS);
