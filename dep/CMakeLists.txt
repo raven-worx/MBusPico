@@ -81,5 +81,5 @@ list(TRANSFORM mbedtls_src_crypto PREPEND ${CMAKE_CURRENT_LIST_DIR}/mbedtls/libr
 add_library(mbedtls_crypto STATIC)
 target_sources(mbedtls_crypto PRIVATE ${mbedtls_src_crypto})
 
-set_target_properties(mbedtls_crypto PROPERTIES COMPILE_FLAGS "-I${CMAKE_CURRENT_LIST_DIR}/../include -DMBEDTLS_CONFIG_FILE='<mbedtls_config.h>'")
+set_target_properties(mbedtls_crypto PROPERTIES COMPILE_FLAGS "-I${PROJECT_SOURCE_DIR}/include -DMBEDTLS_CONFIG_FILE=\"<mbedtls_config.h>\"")
 target_include_directories(mbedtls_crypto PUBLIC ${CMAKE_CURRENT_LIST_DIR}/mbedtls/include ${CMAKE_CURRENT_LIST_DIR}/mbedtls/library)

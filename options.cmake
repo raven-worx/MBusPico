@@ -1,6 +1,8 @@
-option(MBUSPICO_UPDATE_INTERVAL_S "Value update interval [s]" 10)
-option(MBUSPICO_DEVICE_KEY "Device encryption key (if required)" "")
-option(MBUSPICO_LOG_LEVEL "Log level (LOG_NONE, LOG_ERROR, LOG_INFO, LOG_DEBUG)" "LOG_ERROR")
+# BASIC
+set(MBUSPICO_UPDATE_INTERVAL_S "10" CACHE STRING "Value update interval [s]")
+set(MBUSPICO_DEVICE_KEY "" CACHE STRING "Device encryption key (if required)")
+set(MBUSPICO_LOG_LEVEL "LOG_ERROR" CACHE STRING "Log level (LOG_NONE, LOG_ERROR, LOG_INFO, LOG_DEBUG)")
+set_property(CACHE MBUSPICO_LOG_LEVEL PROPERTY STRINGS "LOG_NONE" "LOG_ERROR" "LOG_INFO" "LOG_DEBUG")
 
 # WIFI
 option(MBUSPICO_WIFI_ENABLED "Connect to Wifi network" ON)
