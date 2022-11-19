@@ -2,39 +2,34 @@
 #include <hardware/uart.h>
 #include <hardware/irq.h>
 
-#define TAG "UART"
-
-#define UART_ID 	uart0
+#define UART_ID 	uart1
 #define BAUD_RATE 	2400
 #define DATA_BITS 	8
 #define STOP_BITS 	1
 #define PARITY		UART_PARITY_EVEN
 
-// We are using pins 0 and 1, but see the GPIO function select table in the
-// datasheet for information on which other pins can be used.
-#define UART_TX_PIN 0
-#define UART_RX_PIN 1
+#define UART_TX_PIN 4
+#define UART_RX_PIN 5
 
-// RX interrupt handler
+// UART RX interrupt handler
 static void on_uart_rx() {
-	//MBUSPICO_LOG_D(TAG, "data ready to read");
 	xMBusData_t d = {0};
 	while (uart_is_readable(UART_ID)) {
 		uint8_t ch = uart_getc(UART_ID);
 		d.data[d.len] = ch;
 		d.len++;
 		if (d.len == MAX_QUEUE_ITEM_SIZE) {
-			xQueueSend(xDeviceEventQueue, &d, 0);
+			xQueueSendToBackFromISR(g_DeviceEventQueue, &d, 0);
 			d.len = 0;
 		}
 	}
 	if (d.len > 0) {
-		xQueueSend(xDeviceEventQueue, &d, 0); 
+		xQueueSendToBackFromISR(g_DeviceEventQueue, &d, 0); 
 	}
 }
 
 static void mbuspico_uart_init() {
-	MBUSPICO_LOG_D(TAG, "mbuspico_uart_init()");
+	MBUSPICO_LOG_D(LOG_TAG_UART, "mbuspico_uart_init()");
 	
 	// Set up UART with a basic baud rate
 	uart_init(UART_ID, 2400);
@@ -58,7 +53,7 @@ static void mbuspico_uart_init() {
 	// Set up a RX interrupt
 	// We need to set up the handler first
 	// Select correct interrupt for the UART we are using
-	int UART_IRQ = UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
+	int UART_IRQ = (UART_ID == uart0) ? UART0_IRQ : UART1_IRQ;
 	
 	// And set up and enable the interrupt handlers
 	irq_set_exclusive_handler(UART_IRQ, on_uart_rx);
@@ -67,15 +62,15 @@ static void mbuspico_uart_init() {
 	// Now enable the UART to send interrupts - RX only
 	uart_set_irq_enables(UART_ID, true, false);
 	
-	MBUSPICO_LOG_D(TAG, "UART initialized");
+	MBUSPICO_LOG_D(LOG_TAG_UART, "UART initialized");
 }
 
 void mbuspico_uart_task(void* arg) {
-	MBUSPICO_LOG_D(TAG, "mbuspico_uart_task()");
+	MBUSPICO_LOG_D(LOG_TAG_UART, "mbuspico_uart_task()");
 	
 	mbuspico_uart_init();
 	
 	for (;;) {
-		vTaskDelay(5000/portTICK_PERIOD_MS);
+		vTaskDelay(50/portTICK_PERIOD_MS);
 	}
 }
