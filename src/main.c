@@ -1,4 +1,5 @@
 #include <mbuspico.h>
+#include <stdio.h>
 #include <string.h>
 #include "hardware/watchdog.h"
 

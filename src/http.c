@@ -6,12 +6,10 @@
 #include <stdlib.h>
 #include <pico/stdlib.h>
 #include <pico/cyw43_arch.h>
-#include <lwip/pbuf.h>
+#include <lwip/sockets.h>
 #include <lwip/tcp.h>
-#include <lwip/apps/lwiperf.h>
 #include <lwip/ip4_addr.h>
 #include <lwip/netif.h>
-#include <lwip/sockets.h>
 
 xSemaphoreHandle g_HttpConnectionSemaphore;
 

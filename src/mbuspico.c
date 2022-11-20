@@ -1,4 +1,5 @@
 #include <mbuspico.h>
+#include <stdio.h>
 #include <semphr.h>
 #include <string.h>
 #include <hardware/watchdog.h>
@@ -178,7 +179,7 @@ static void get_log_tag(uint16_t id, char* tag) {
 	}
 }
 
-#if MBUSPICO_LOG_LEVEL >= MBUSPICO_LOG_ERROR
+#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
 void MBUSPICO_LOG_E(uint16_t id, const char* format, ...) {
 	if (LOG_FILTER & id && xSemaphoreTake(g_LogMutex, portMAX_DELAY) == pdTRUE) {
 		char tag[10];
@@ -194,7 +195,7 @@ void MBUSPICO_LOG_E(uint16_t id, const char* format, ...) {
 }
 #endif
 
-#if MBUSPICO_LOG_LEVEL >= MBUSPICO_LOG_INFO
+#if MBUSPICO_LOG_LEVEL >= LOG_INFO
 void MBUSPICO_LOG_I(uint16_t id, const char* format, ...) {
 	if (LOG_FILTER & id && xSemaphoreTake(g_LogMutex, portMAX_DELAY) == pdTRUE) {
 		char tag[10];
@@ -210,7 +211,7 @@ void MBUSPICO_LOG_I(uint16_t id, const char* format, ...) {
 }
 #endif
 
-#if MBUSPICO_LOG_LEVEL >= MBUSPICO_LOG_DEBUG
+#if MBUSPICO_LOG_LEVEL >= LOG_DEBUG
 void MBUSPICO_LOG_D(uint16_t id, const char* format, ...) {
 	if (LOG_FILTER & id && xSemaphoreTake(g_LogMutex, portMAX_DELAY) == pdTRUE) {
 		char tag[10];

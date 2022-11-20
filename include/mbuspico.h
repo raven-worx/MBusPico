@@ -2,7 +2,6 @@
 
 #include <mbuspico.conf.h>
 
-#include <stdio.h>
 #include <stdarg.h>
 #include <pico/stdlib.h>
 #include <hardware/regs/rosc.h>

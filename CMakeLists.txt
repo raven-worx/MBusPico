@@ -3,7 +3,7 @@ include(CMakeDependentOption)
 
 # initialize pico-sdk from GIT
 # (note this can come from environment, CMake cache etc)
-#set(PICO_SDK_FETCH_FROM_GIT off)
+#set(PICO_SDK_FETCH_FROM_GIT OFF)
 #set(PICO_SDK_FETCH_FROM_GIT_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_LIST_DIR}/FreeRTOS/FreeRTOS-Kernel)
