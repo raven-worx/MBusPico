@@ -28,18 +28,8 @@ static int mbuspico_wifi_init() {
 		return 1;
 	}
 	MBUSPICO_LOG_I(LOG_TAG_WIFI, "Wifi initialized");
-	
-	const char hostname[] = 
-#ifdef MBUSPICO_WIFI_HOSTNAME
-	MBUSPICO_WIFI_HOSTNAME
-#else
-	PROJECT_NAME
-#endif
-	;
-	if (strlen(hostname) > 0) {
-		netif_set_hostname(&cyw43_state.netif[0], hostname);
-		MBUSPICO_LOG_I(LOG_TAG_WIFI, "Hostname set to '%s'", hostname);
-	}
+
+	MBUSPICO_LOG_I(LOG_TAG_WIFI, "Hostname set to '%s'", CYW43_HOST_NAME);
 	
 	cyw43_arch_enable_sta_mode();
 	MBUSPICO_LOG_I(LOG_TAG_WIFI, "Wifi STA mode enabled");

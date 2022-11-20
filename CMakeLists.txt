@@ -17,7 +17,7 @@ include(options.cmake)
 include(pico_sdk_import.cmake)
 
 set(TARGETNAME "mbuspico")
-project(MBusPico VERSION 1.0)
+project(MBusPico VERSION 1.1)
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -53,6 +53,7 @@ PUBLIC
 	PROJECT_NAME="${PROJECT_NAME}"
 	PROJECT_VERSION="${PROJECT_VERSION}"
 	PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS=5000
+	CYW43_HOST_NAME="${MBUSPICO_WIFI_HOSTNAME}"
 PRIVATE
 	$<$<CONFIG:DEBUG>:_DEBUG=1>
 )
