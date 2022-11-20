@@ -18,6 +18,7 @@ void mbuspico_print_meterdata(void) {
 		MBUSPICO_LOG_D(LOG_TAG_MAIN,
 				"\n"
 				"Timestamp: %s" "\n"
+				"Loxone Timestamp: %lld" "\n"
 				"Meter #: %s" "\n"
 				"activePowerPlus: %.2f [W]" "\n"
 				"activePowerMinus: %.2f [W]" "\n"
@@ -34,6 +35,7 @@ void mbuspico_print_meterdata(void) {
 				"powerFactor: %.2f" "\n"
 				"================" "\n",
 				g_MeterData.timestamp,
+				g_MeterData.lxTimestamp,
 				g_MeterData.meterNumber,
 				g_MeterData.activePowerPlus,
 				g_MeterData.activePowerMinus,
@@ -61,6 +63,7 @@ size_t mbuspico_get_meterdata_json(char* data_buffer, size_t buffer_size) {
 				data_buffer, buffer_size,
 				"{" "\n"
 				"\"timestamp\": \"%s\"," "\n"
+				"\"lxTimestamp\": %lld," "\n"
 				"\"meterNumber\": \"%s\"," "\n"
 				"\"activePowerPlus\": %.2f," "\n"
 				"\"activePowerMinus\": %.2f," "\n"
@@ -75,6 +78,7 @@ size_t mbuspico_get_meterdata_json(char* data_buffer, size_t buffer_size) {
 				"\"powerFactor\": %.2f" "\n"
 				"}",
 				g_MeterData.timestamp,
+				g_MeterData.lxTimestamp,
 				g_MeterData.meterNumber,
 				g_MeterData.activePowerPlus,
 				g_MeterData.activePowerMinus,

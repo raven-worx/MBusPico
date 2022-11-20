@@ -31,6 +31,7 @@ typedef struct {
 	float currentL3;			// [A]
 	float powerFactor;
 	char timestamp[21];			// 0000-00-00T00:00:00Z
+	uint64_t lxTimestamp;		// Loxone timestamp (seconds since 1.1.2009)
 	char meterNumber[13];		// 123456789012
 } MeterData_t;
 

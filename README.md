@@ -6,11 +6,29 @@ This project was created mostly out of interest and the wish to read out and dis
 
 Currently the only smart meter device supported is the **Kaifa MA309M** (austrian provider Netz NÖ/EVN), but could be extended to any other model. Credits for the data intepretation code goes out to **[firegore/esphome-dlms-meter](https://github.com/firegore/esphome-dlms-meter)**!
 
-The read meter data is published via HTTP and/or UDP in JSON format:
+The read meter data values are published via HTTP and/or UDP in JSON format:
+
+| **Field**            |  **Description / Unit** |
+| -------------------- | ---------------  |
+| timestamp            | Timestamp of the reading in the format "0000-00-00T00:00:00Z" |
+| lxTimestamp          | Loxone timestamp (seconds since 1.1.2009) |
+| meterNumber          | serial number of the meter device |
+| activePowerPlus      | [W]              |
+| activePowerMinus     | [W]              |
+| activeEnergyPlus     | [Wh]             |
+| activeEnergyMinus    | [Wh]             |
+| voltageL1            | [V]              |
+| voltageL2            | [V]              |
+| voltageL3            | [V]              |
+| currentL1            | [A]              |
+| currentL2            | [A]              |
+| currentL3            | [A]              |
+| powerFactor          | [see Wikipedia](https://en.wikipedia.org/wiki/Power_factor) |
 
 ```
 {
-"timestamp": "2022-11-17T00:13:55Z",
+"timestamp": "2022-11-20T19:03:40Z",
+"lxTimestamp": 438203020,
 "meterNumber": "123456789012",
 "activePowerPlus": 472.00,
 "activePowerMinus": 0.00,

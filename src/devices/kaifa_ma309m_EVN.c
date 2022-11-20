@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "pico/stdlib.h"
+#include <time.h>
 
 #include <mbedtls/gcm.h>
 
@@ -157,6 +158,49 @@ static void log_packet(byte array[], size_t length) {
 	buffer[(length*3)-1] = '\0';
 
 	MBUSPICO_LOG_D(LOG_TAG_DEVICE, buffer);
+}
+
+static time_t timestamp_to_lx(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) {
+	static time_t lxTime = 0;
+	if (lxTime <= 0) {
+		struct tm t;
+   		t.tm_year = 2009-1900;
+   		t.tm_mon = 1-1;
+   		t.tm_mday = 1;
+   		t.tm_hour = 0;
+   		t.tm_min = 0;
+   		t.tm_sec = 0;
+   		t.tm_isdst = -1;
+		lxTime = mktime(&t);
+		if (lxTime <= 0) {
+			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Loxone timestamp initializion failed: %lld", lxTime);
+			return 0;
+		}
+		else {
+			MBUSPICO_LOG_I(LOG_TAG_DEVICE, "Loxone timestamp initialized: %lld", lxTime);
+		}
+	}
+   
+	struct tm t;
+   		t.tm_year = year-1900;
+   		t.tm_mon = month-1;
+   		t.tm_mday = day;
+   		t.tm_hour = hour;
+   		t.tm_min = minute;
+   		t.tm_sec = second;
+   		t.tm_isdst = -1;
+	time_t timestamp = mktime(&t);
+	if (timestamp <= 0) {
+		MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Failed to create timestamp from: '%d-%02d-%02d %02d:%02d:%02d'", year, month, day, hour, minute, second);
+		return 0;
+	}
+
+	if (timestamp < lxTime) {
+		MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Invalid timestamp: timestamp invalid or earlier than Loxone timestamp: %lld (ts) < %lld (lx)", timestamp, lxTime);
+		return 0;
+	}
+
+	return timestamp - lxTime;
 }
 
 static int available(xMBusData_t* data) {
@@ -471,6 +515,8 @@ static void loop() {
 						memcpy(&second, &plaintext[currentPosition + 7], 1);
 
 						sprintf(meterData.timestamp, "%04u-%02u-%02uT%02u:%02u:%02uZ", year, month, day, hour, minute, second);
+
+						meterData.lxTimestamp = timestamp_to_lx(year, month, day, hour, minute, second);
 					}
 					else if(codeType == CodeType_MeterNumber) {
 						MBUSPICO_LOG_D(LOG_TAG_DEVICE, "Constructing MeterNumber...");
