@@ -4,25 +4,25 @@
 
 This project was created mostly out of interest and the wish to read out and display my power meter data in my Loxone smart home setup. (Thus the option with the 24V power supply - see below)
 
-Currently the only smart meter device supported is the **Kaifa MA309M** (austrian provider Netz NÖ/EVN), but could be extended to any other model. Credits for the data intepretation code goes out to **[firegore/esphome-dlms-meter](https://github.com/firegore/esphome-dlms-meter)**!
+Currently the only smart meter device supported is the **Kaifa MA309M** (Austrian power provider Netz NÖ), but could be extended to any other model. Credits for the data intepretation code goes out to **[firegore/esphome-dlms-meter](https://github.com/firegore/esphome-dlms-meter)**!
 
 The read meter data values are published via HTTP and/or UDP in JSON format:
 
 | **Field**            |  **Description / Unit** |
-| -------------------- | ---------------  |
+| -------------------- | ----------------------  |
 | timestamp            | Timestamp of the reading in the format "0000-00-00T00:00:00Z" |
 | lxTimestamp          | Loxone timestamp (seconds since 1.1.2009) |
 | meterNumber          | serial number of the meter device |
-| activePowerPlus      | [W]              |
-| activePowerMinus     | [W]              |
-| activeEnergyPlus     | [Wh]             |
-| activeEnergyMinus    | [Wh]             |
-| voltageL1            | [V]              |
-| voltageL2            | [V]              |
-| voltageL3            | [V]              |
-| currentL1            | [A]              |
-| currentL2            | [A]              |
-| currentL3            | [A]              |
+| activePowerPlus      | [W]                     |
+| activePowerMinus     | [W]                     |
+| activeEnergyPlus     | [Wh]                    |
+| activeEnergyMinus    | [Wh]                    |
+| voltageL1            | [V]                     |
+| voltageL2            | [V]                     |
+| voltageL3            | [V]                     |
+| currentL1            | [A]                     |
+| currentL2            | [A]                     |
+| currentL3            | [A]                     |
 | powerFactor          | [see Wikipedia](https://en.wikipedia.org/wiki/Power_factor) |
 
 ```
@@ -48,10 +48,11 @@ The read meter data values are published via HTTP and/or UDP in JSON format:
 
 * [RaspberryPi Pico W(H)](https://amzn.to/3OlR064)
 * [M-BUS SLAVE CLICK module](https://www.mikroe.com/m-bus-slave-click)
-* [RJ11/RJ12 cable](https://amzn.to/3TSGO6r)
-* Optional (only if you plan to connect a 24V power source)
-    * [24V -> 5V step down regulator](https://www.pololu.com/product/2831) [Shop link](https://www.berrybase.at/pololu-5v-1a-step-down-spannungsregler-d24v10f5)
-    * [power connector clamp](https://www.berrybase.at/anschlussklemme-schraubbar-900-gewinkelt-1-25mm2-rm-5-08mm-2-polig)
+* [RJ11/RJ12 cable](https://amzn.to/3TSGO6r) (or an old telephone cable you may have lying around)
+* [24V -> 3.3V step down regulator]
+    * [Example](https://www.berrybase.at/step-down-netzteilmodul-4-38v-1-25-36v/5a-mit-schraubklemmen)
+    * [Example](https://www.reichelt.at/at/de/dc-dc-wandler-3-3-w-3-3-v-1000-ma-sil-lmo78-03-1-0-p242837.html?search=lmo78_03&&r=1)
+* [power connector clamp](https://www.berrybase.at/anschlussklemme-schraubbar-900-gewinkelt-1-25mm2-rm-5-08mm-2-polig) (optional)
 
 *Note*: the links of the above listed hardware components to Amazon are exemplary. If you want to support me you can use them to order the linked products using these links.
 
@@ -117,25 +118,25 @@ Hold the button on the Pico W while connecting it to the PC via a USB cable. The
 
 # Hardware wiring / assembly
 
-See the tables below how to wire the Raspberry Pico W with the used hware components and power supply.
+See the tables below how to wire the Raspberry Pico W with the used hardware components and power supply.
 
 | **Pico W**      | **M-Bus Slave CLICK**   | **RJ11** |  **Notes** |
 | --------------- | ----------------------- | -------- |  --------- |
-| 3.3V (PIN 36)   | 3V3                     | -        | 3.3V power supply |
-| GND (PIN 8)     | GND                     | -        | Ground |
 | GPIO4 (PIN 6)   | RX                      | -        | UART RX of MBUS module <--> UART1 TX of Pico W |
 | GPIO5 (PIN 7)   | TX                      | -        | UART TX of MBUS module <--> UART1 RX of Pico W |
-| -               | MBUS1                   | 3        | MBUS module to RJ11 cable line 3 or 4, polarity does not matter |
-| -               | MBUS2                   | 4        | MBUS module to RJ11 cable line 3 or 4, polarity does not matter |
+| -               | MBUS1                   | 3        | MBUS module to RJ11 cable line 3 or 4 (polarity doesn't matter) |
+| -               | MBUS2                   | 4        | MBUS module to RJ11 cable line 3 or 4 (polarity doesn't matter) |
 
-additionally with optional 24V adapter:
+Power supply (24V):
 
-| **Pico W**      | **24V -> 5V module**    | **24V power source** |  **Notes** |
-| --------------- | ----------------------- | -------------------- |  --------- |
-| VSYS (PIN 39)   | VOUT                    | -                    | 5V power supply for Pico W |
-| GND (PIN 38)    | -                       | DC-/GND              | Ground |
-| -               | VIN                     | DC+/24V              | 24V external power supply |
-| -               | GND                     | DC-/GND              | Ground |
+| **Pico W**      | **M-Bus Slave CLICK**   | **24V -> 3.3V module**  | **24V power source** |  **Notes** |
+| --------------- | ----------------------- | ----------------------- | -------------------- |  --------- |
+| VSYS (PIN 39)   | -                       | VOUT                    |                      | 3.3V power supply for Pico W |
+| GND (PIN 38)    | -                       | GND                     |                      | Ground |
+| -               | 3V3                     | VOUT                    |                      | 3.3V power supply for MBus CLICK module |
+| -               | GND                     | GND                     |                      | Ground |
+| -               | -                       | VIN                     | DC+/24V              | 24V external power supply |
+| -               | -                       | GND                     | DC-/GND              | Ground |
 
 ![Example wiring](/3d/image.jpg?raw=true)
 
