@@ -115,6 +115,8 @@ void mbuspico_set_meterdata(MeterData_t* data) {
 }
 
 void mbuspico_init(void) {
+	memset(&g_MeterData, 0, sizeof(MeterData_t));
+
 	g_ValueMutex =  xSemaphoreCreateBinary();
 	xSemaphoreGive(g_ValueMutex);
 	

@@ -293,6 +293,7 @@ static void loop() {
 		int currentPosition = DECODER_START_OFFSET;
 		
 		MeterData_t meterData;
+		memset(&meterData, 0, sizeof(MeterData_t));
 
 		do
 		{

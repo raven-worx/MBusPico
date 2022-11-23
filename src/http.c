@@ -188,13 +188,13 @@ static void do_handle_connection(void* arg)
 static void handle_connection(int conn_sock)
 {
 	TaskHandle_t task;
-	xSemaphoreTake(g_HttpConnectionSemaphore, portMAX_DELAY);
-
-	static uint32_t connectionCounter = 0;
-	char taskName[15];
-	snprintf(taskName, sizeof(taskName)-1, "Http#%lu", ++connectionCounter);
-	MBUSPICO_LOG_D(LOG_TAG_HTTP, "Creating task for new HTTP connection: %s", taskName);
-	xTaskCreate(do_handle_connection, taskName, configMINIMAL_STACK_SIZE, (void *)conn_sock, tskIDLE_PRIORITY+1, &task);
+	if (xSemaphoreTake(g_HttpConnectionSemaphore, 5000/portTICK_PERIOD_MS)) {
+		static uint32_t connectionCounter = 0;
+		char taskName[configMAX_TASK_NAME_LEN] = {0};
+		snprintf(taskName, configMAX_TASK_NAME_LEN-1, "Http#%lu", ++connectionCounter);
+		MBUSPICO_LOG_D(LOG_TAG_HTTP, "Creating task for new HTTP connection: %s", taskName);
+		xTaskCreate(do_handle_connection, taskName, configMINIMAL_STACK_SIZE*3, (void*)conn_sock, tskIDLE_PRIORITY+1, &task);
+	}
 }
 
 static void run_server()
