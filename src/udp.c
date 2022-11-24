@@ -14,7 +14,7 @@
 
 static uint64_t last_send = 0;
 
-static const send_interval = 1000*
+static const int send_interval = 1000*
 #ifdef MBUSPICO_UDP_INTERVAL_S
   MBUSPICO_UDP_INTERVAL_S
 #else
