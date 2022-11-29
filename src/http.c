@@ -45,8 +45,11 @@ static int handle_request(int conn_sock)
 		int status_code = 0;
 		
 		if (strstr(buffer,"GET ") == buffer) { // starts with GET
-			if (strstr(buffer,"GET / ") == buffer) { // only support root path for now
+			if (strstr(buffer,"GET / ") == buffer) {
 				status_code = 200;
+			}
+			else if (strstr(buffer,"GET /update ") == buffer) {
+				status_code = 202;
 			}
 			else {
 				status_code = 404;
@@ -84,6 +87,20 @@ static int send_response(int socket, int statusCode)
 				char data_buffer[RESPONSE_BUFFER_SIZE] = {0};
 				size_t data_size = mbuspico_get_meterdata_json(data_buffer, RESPONSE_BUFFER_SIZE);
 				buffer_size = snprintf(buffer, RESPONSE_BUFFER_SIZE, response_tmpl, data_size, data_buffer);
+			}
+			break;
+		case 202:
+			{
+				const char* response_tmpl = 
+					"HTTP/1.1 202 Accepted" "\r\n"
+					"Server: " PROJECT_NAME "/" PROJECT_VERSION "\r\n"
+					"Content-Length: %d" "\r\n"
+					"Content-Type: text/html" "\r\n"
+					"Connection: close" "\r\n"
+					"\r\n"
+					"%s";
+				char msg[] = "Device is restarting into bootloader...";
+				buffer_size = snprintf(buffer, RESPONSE_BUFFER_SIZE, response_tmpl, strlen(msg), msg);
 			}
 			break;
 		case 400:
@@ -161,7 +178,7 @@ static int send_response(int socket, int statusCode)
 
 static void do_handle_connection(void* arg)
 {
-    int conn_sock = (int)arg;
+	int conn_sock = (int)arg;
 
 #if configUSE_TRACE_FACILITY && MBUSPICO_LOG_LEVEL >= LOG_DEBUG
 	TaskStatus_t xTaskDetails;
@@ -169,16 +186,20 @@ static void do_handle_connection(void* arg)
 	MBUSPICO_LOG_D(LOG_TAG_HTTP, "START connection task: %s, socket: %d", xTaskDetails.pcTaskName, conn_sock);
 #endif
 
-	int statusCode = handle_request(conn_sock);
-	if (statusCode > 0) {
-		send_response(conn_sock,statusCode);
+	int status_code = handle_request(conn_sock);
+	if (status_code > 0) {
+		send_response(conn_sock,status_code);
 	}
 
 	lwip_shutdown(conn_sock, SHUT_RDWR);
 	lwip_close(conn_sock);
+	
+	if (status_code == 202) { // TODO: cleanup handling
+		mbuspico_reboot_into_bootloader();
+	}
 
 	xSemaphoreGive(g_HttpConnectionSemaphore);
-    vTaskDelete(NULL);
+	vTaskDelete(NULL);
 
 #if configUSE_TRACE_FACILITY && MBUSPICO_LOG_LEVEL >= LOG_DEBUG
 	MBUSPICO_LOG_D(LOG_TAG_HTTP, "EXIT connection task: %s, socket: %d", xTaskDetails.pcTaskName, conn_sock);

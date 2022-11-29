@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <semphr.h>
 #include <string.h>
+#include <pico/bootrom.h>
 #include <hardware/watchdog.h>
 #include <hardware/regs/rosc.h>
 #include <hardware/regs/addressmap.h>
@@ -141,16 +142,20 @@ uint64_t mbuspico_time_ms(void) {
 // taken from https://stackoverflow.com/a/53579348
 void mbuspico_hex_to_bin(const char* in, size_t len, byte* out) {
 	static const unsigned char TBL[] = {
-    	 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  58,  59,  60,  61,
-    	62,  63,  64,  10,  11,  12,  13,  14,  15,  71,  72,  73,  74,  75,
-    	76,  77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,
-    	90,  91,  92,  93,  94,  95,  96,  10,  11,  12,  13,  14,  15
-  	};
+		0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  58,  59,  60,  61,
+		62,  63,  64,  10,  11,  12,  13,  14,  15,  71,  72,  73,  74,  75,
+		76,  77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,
+		90,  91,  92,  93,  94,  95,  96,  10,  11,  12,  13,  14,  15
+	};
 
-  	static const unsigned char *LOOKUP = TBL - 48;
+	static const unsigned char *LOOKUP = TBL - 48;
 
-  	const char* end = in + len;
-  	while(in < end) *(out++) = LOOKUP[*(in++)] << 4 | LOOKUP[*(in++)];
+	const char* end = in + len;
+	while(in < end) *(out++) = LOOKUP[*(in++)] << 4 | LOOKUP[*(in++)];
+}
+
+void mbuspico_reboot_into_bootloader() {
+	reset_usb_boot(0,0);
 }
 
 // ENTROPY RNG

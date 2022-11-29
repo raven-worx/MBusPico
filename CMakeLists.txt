@@ -17,7 +17,7 @@ include(options.cmake)
 include(pico_sdk_import.cmake)
 
 set(TARGETNAME "mbuspico")
-project(MBusPico VERSION 1.1)
+project(MBusPico VERSION 1.2)
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()

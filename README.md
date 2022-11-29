@@ -97,8 +97,6 @@ docker run -it --rm -v ${PWD}:/opt/mbuspico mbuspico/build
 cmake .. -DCMAKE_BUILD_TYPE=Release -D...
 ```
 
-Hold the button on the Pico W while connecting it to the PC via a USB cable. The Pico will show up as a flash drive. Copy the `mbuspico.uf2` file to the appeared flash drive. The Pico W will automatically reboot into the just flashed firmware after copying has finished. Done.
-
 ### Build options
 
 | **Option**            | Default value | **required**            |  **Description** |
@@ -115,6 +113,11 @@ Hold the button on the Pico W while connecting it to the PC via a USB cable. The
 | MBUSPICO_UDP_INTERVAL_S | 30          | no                      | the maximum interval [sec] the meter data should be send out via UDP |
 | MBUSPICO_HTTP_ENABLED  | ON           | no                      | specifies if the device should launch a simple HTTP server to provide the read meter data |
 | MBUSPICO_HTTP_SERVER_PORT  | 80       | no                      | specifies the listening port for the HTTP webserver |
+
+# Transfer MBusPico onto the device
+
+Hold the BOOTSEL button on the Pico W while connecting it to the PC via a USB cable. Since v1.2 its also possible to call `http://<ip-address>/update` to restart into the bootloader (if built with HTTP option).
+The Pico will show up as a flash drive. Copy the `mbuspico.uf2` file to the appeared flash drive. The Pico W will automatically reboot into the just flashed firmware after copying has finished. Done.
 
 # Hardware wiring / assembly
 
