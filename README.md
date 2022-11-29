@@ -50,7 +50,7 @@ The read meter data values are published via HTTP and/or UDP in JSON format:
 * [M-BUS SLAVE CLICK module](https://www.mikroe.com/m-bus-slave-click)
 * [RJ11/RJ12 cable](https://amzn.to/3TSGO6r) (or an old telephone cable you may have lying around)
 * [24V -> 3.3V step down regulator]
-    * [Example](https://www.berrybase.at/step-down-netzteilmodul-4-38v-1-25-36v/5a-mit-schraubklemmen)
+    * [Example](https://www.berrybase.at/step-down-netzteilmodul-4-38v-1-25-36v/5a-mit-schraubklemmen) (used in 3d case v2)
     * [Example](https://www.reichelt.at/at/de/dc-dc-wandler-3-3-w-3-3-v-1000-ma-sil-lmo78-03-1-0-p242837.html?search=lmo78_03&&r=1)
 * [power connector clamp](https://www.berrybase.at/anschlussklemme-schraubbar-900-gewinkelt-1-25mm2-rm-5-08mm-2-polig) (optional)
 
@@ -141,7 +141,7 @@ Power supply (24V):
 | -               | -                       | VIN                     | DC+/24V              | 24V external power supply |
 | -               | -                       | GND                     | DC-/GND              | Ground |
 
-![Example wiring](/3d/image.jpg?raw=true)
+[<img src="/3d/image.jpg?raw=true" width="600"/>](/3d/image.jpg?raw=true)
 
 ## 3D printer files
 
