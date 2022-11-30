@@ -143,6 +143,16 @@ Power supply (24V):
 
 [<img src="/3d/image.jpg?raw=true" width="600"/>](/3d/image.jpg?raw=true)
 
+## Loxone integration
+
+The folder `loxone` contains a ready made HTTP VI template file for quick integration into Loxone Config.
+
+[<img src="/loxone/config.png?raw=true" width="600"/>](/loxone/config.png?raw=true)
+
+Visualization in Loxone App:
+
+[<img src="/loxone/app.png?raw=true" width="200"/>](/loxone/app.png?raw=true)
+
 ## 3D printer files
 
 I created a 3d printable *reference design* of a case for the used hardware components listed above.

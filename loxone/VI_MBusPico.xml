@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VirtualInHttp Title="Smart Meter" Comment="HTTP VirtualIn Template for MBusPico" Address="http://MBusPico" PollingTime="10">
+	<Info templateType="2" minVersion="13011019"/>
+	<VirtualInHttpCmd Title="Zählernummer" Comment="" Check="&quot;meterNumber&quot;: &quot;\v&quot;" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v&gt;"/>
+	<VirtualInHttpCmd Title="Verbrauch Leistung" Comment="" Check="&quot;activePowerPlus&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v&gt;W"/>
+	<VirtualInHttpCmd Title="Zählerstand" Comment="" Check="&quot;activeEnergyPlus&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v&gt;Wh"/>
+	<VirtualInHttpCmd Title="Spannung L1" Comment="" Check="&quot;voltageL1&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v.1&gt;V"/>
+	<VirtualInHttpCmd Title="Spannung L2" Comment="" Check="&quot;voltageL2&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v.1&gt;V"/>
+	<VirtualInHttpCmd Title="Spannung L3" Comment="" Check="&quot;voltageL3&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v.1&gt;V"/>
+	<VirtualInHttpCmd Title="Strom L1" Comment="" Check="&quot;currentL1&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v.2&gt;A"/>
+	<VirtualInHttpCmd Title="Strom L2" Comment="" Check="&quot;currentL2&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v.2&gt;A"/>
+	<VirtualInHttpCmd Title="Strom L3" Comment="" Check="&quot;currentL3&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v.2&gt;A"/>
+	<VirtualInHttpCmd Title="Lesezeit" Comment="" Check="&quot;lxTimestamp&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v.u&gt;"/>
+	<VirtualInHttpCmd Title="Wirkungsgrad" Comment="" Check="&quot;powerFactor&quot;: \v" Signed="true" Analog="true" SourceValLow="0" DestValLow="0" SourceValHigh="100" DestValHigh="100" DefVal="0" MinVal="-10000" MaxVal="10000" Unit="&lt;v.1&gt;"/>
+</VirtualInHttp>

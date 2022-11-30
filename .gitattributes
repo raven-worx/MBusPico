@@ -5,6 +5,7 @@
 
 # binary files
 *.jpg binary
+*.png binary
 
 # Define binary file attributes.
 # - Do not treat them as text.
