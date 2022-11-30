@@ -64,6 +64,7 @@ The software for the Pico W microcontroller is written in C using
 * mbedtls
 
 ## Build
+
 ### LINUX
 ```console
 mkdir build
@@ -143,7 +144,7 @@ Power supply (24V):
 
 [<img src="/3d/image.jpg?raw=true" width="600"/>](/3d/image.jpg?raw=true)
 
-## Loxone integration
+# Loxone integration
 
 The folder `loxone` contains a ready made HTTP VI template file for quick integration into Loxone Config.
 
@@ -153,11 +154,11 @@ Visualization in Loxone App:
 
 [<img src="/loxone/app.png?raw=true" width="200"/>](/loxone/app.png?raw=true)
 
-## 3D printer files
+# 3D printer files
 
 I created a 3d printable *reference design* of a case for the used hardware components listed above.
 You can find the files in the `3d` folder of this repository.
 
-## License
+# License
 
 Licensed under [GPLv3](https://github.com/raven-worx/loveboxpi/blob/master/LICENSE)
