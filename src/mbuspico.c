@@ -125,8 +125,6 @@ void mbuspico_init(void) {
 	xSemaphoreGive(g_LogMutex);
 
 	g_DeviceEventQueue = xQueueCreate(15, sizeof(xMBusData_t));
-
-	g_HttpConnectionSemaphore = xSemaphoreCreateCounting(HTTP_MAX_CONNECTION_COUNT, HTTP_MAX_CONNECTION_COUNT);
 }
 
 void mbuspico_reset(void) {

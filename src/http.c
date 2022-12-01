@@ -11,7 +11,9 @@
 #include <lwip/ip4_addr.h>
 #include <lwip/netif.h>
 
-xSemaphoreHandle g_HttpConnectionSemaphore;
+#define HTTP_MAX_CONNECTION_COUNT 4
+
+xSemaphoreHandle g_HttpConnectionSemaphore = xSemaphoreCreateCounting(HTTP_MAX_CONNECTION_COUNT, HTTP_MAX_CONNECTION_COUNT);
 
 #define REQUEST_BUFFER_SIZE 	1024
 #define RESPONSE_BUFFER_SIZE 	512

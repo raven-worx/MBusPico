@@ -46,10 +46,6 @@ uint64_t mbuspico_time_ms(void);
 void mbuspico_hex_to_bin(const char* in, size_t len, unsigned char* out);
 void mbuspico_reboot_into_bootloader();
 
-// HTTP
-#define HTTP_MAX_CONNECTION_COUNT 4
-extern xSemaphoreHandle g_HttpConnectionSemaphore;
-
 // UART data queue
 typedef unsigned char byte;
 
