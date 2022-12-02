@@ -62,25 +62,20 @@ The software for the Pico W microcontroller is written in C using
 * pico-sdk
 * FreeRTOS
 * mbedtls
+* mongoose
 
 ## Build
 
-### LINUX
-```console
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release \
-	-DMBUSPICO_WIFI_ENABLED=ON -DMBUSPICO_WIFI_SSID="My Wifi SSID" -DMBUSPICO_WIFI_PWD="12345678" -DMBUSPICO_WIFI_HOSTNAME="MeterReaderPico" \
-	-DMBUSPICO_UDP_ENABLED=ON -DMBUSPICO_UDP_RECEIVER_HOST="192.168.0.99" -DMBUSPICO_UDP_RECEIVER_PORT=3333 \
-	-DMBUSPICO_HTTP_ENABLED=ON -DMBUSPICO_HTTP_SERVER_PORT=8888 \
-	-DMBUSPICO_DEVICE_KEY="36C66639E48A8CA4D6BC8B282A793BBB"
-cmake --build .
-```
+The build options (see below) to configure MBusPico application can be set by editing `options.ini` before starting the build process.
+
+### Linux
+
+Simply run the `build.sh` script.
 
 Make sure you have set the `PICO_SDK_PATH` environment variable pointing to your local pico-sdk checkout.
-If you do not have a checkout of the pico-sdk yet, you can instead add the option `-DPICO_SDK_FETCH_FROM_GIT=ON` to the build command above to automatically checkout the pico-sdk as part of the build process.
+If you do not have a checkout of the pico-sdk yet, you can instead add the option `PICO_SDK_FETCH_FROM_GIT=ON` in the `options.ini` file to automatically checkout the pico-sdk as part of the build process.
 
-### WINDOWS
+### Windows
 
 For Windows i would recommend using Docker for a quick and painless build.
 
@@ -88,14 +83,9 @@ Create a (local) docker image with the file provided in the `docker` folder of t
 ```console
 docker build -t mbuspico/build -f docker/Dockerfile
 ```
-After the build of the docker image has finished (might take a few minutes) start the built docker image and execute the same build command from above (the built docker image already contains the pico-sdk):
+After the build of the docker image has finished (might take a few minutes) simply start the built docker image which implicitly starts building the application:
 ```console
-docker run -it --rm -v ${PWD}:/opt/mbuspico mbuspico/build
-...
-> cd /opt/mbuspico
-> mkdir build
-> cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -D...
+docker run -v ${PWD}:/opt/mbuspico mbuspico/build
 ```
 
 ### Build options
@@ -118,7 +108,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release -D...
 # Transfer MBusPico onto the device
 
 Hold the BOOTSEL button on the Pico W while connecting it to the PC via a USB cable. Since v1.2 its also possible to call `http://<ip-address>/update` to restart into the bootloader (if built with HTTP option).
-The Pico will show up as a flash drive. Copy the `mbuspico.uf2` file to the appeared flash drive. The Pico W will automatically reboot into the just flashed firmware after copying has finished. Done.
+The Pico will show up as a flash drive. Copy the `mbuspico.uf2` file from the build directory to the appeared flash drive. The Pico W will automatically reboot into the just flashed firmware after copying has finished. Done.
 
 # Hardware wiring / assembly
 
