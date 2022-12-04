@@ -17,7 +17,7 @@ include(options.cmake)
 include(pico_sdk_import.cmake)
 
 set(TARGETNAME "mbuspico")
-project(MBusPico VERSION 1.2)
+project(MBusPico VERSION 1.3)
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -65,6 +65,7 @@ target_link_libraries(${TARGETNAME}
 	pico_stdlib
 	FreeRTOS-Kernel-Heap4 # FreeRTOS kernel and dynamic heap
 	mbedtls_crypto
+	mongoose
 )
 
 # enable usb output, disable uart output

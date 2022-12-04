@@ -62,10 +62,13 @@ The software for the Pico W microcontroller is written in C using
 * pico-sdk
 * FreeRTOS
 * mbedtls
+* mongoose
 
 ## Build
 
-The build options (see below) to configure MBusPico application can be set by editing `options.ini` before starting the build process.
+1. Checkout repository: `git clone --recurse-submodules https://github.com/raven-worx/MBusPico.git`
+2. Edit build options (see below) in `options.ini` to configure MBusPico application to your needs
+3. start building (e.g. using Docker - see below)
 
 ### Linux
 
@@ -76,7 +79,7 @@ If you do not have a checkout of the pico-sdk yet, you can instead add the optio
 
 ### Windows
 
-For Windows i would recommend using Docker for a quick and painless build.
+For Windows i recommend using Docker for a quick and painless build.
 
 Create a (local) docker image with the file provided in the `docker` folder of this repository:
 ```console

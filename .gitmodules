@@ -4,3 +4,7 @@
 [submodule "dep/mbedtls"]
 	path = dep/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
+[submodule "dep/mongoose"]
+	path = dep/mongoose
+	url = https://github.com/cesanta/mongoose.git
+	branch = master

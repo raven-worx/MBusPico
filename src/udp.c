@@ -2,17 +2,12 @@
 
 #if MBUSPICO_UDP_ENABLED
 
+#include <mongoose.h>
 #include <pico/cyw43_arch.h>
-#include <lwip/pbuf.h>
-#include <lwip/tcp.h>
-#include <lwip/apps/lwiperf.h>
-#include <lwip/ip4_addr.h>
-#include <lwip/netif.h>
-#include <lwip/sockets.h>
 
 #define DATA_BUFFER_SIZE 	512
 
-static uint64_t last_send = 0;
+#define UDP_CONNECT_TIMEOUT 2000
 
 static const int send_interval = 1000*
 #ifdef MBUSPICO_UDP_INTERVAL_S
@@ -22,54 +17,62 @@ static const int send_interval = 1000*
 #endif
 ;
 
-static void mbuspico_send_udp() {
-	if (last_send > 0 && ((mbuspico_time_ms() - last_send) < send_interval)) {
-		return;
-	}
+typedef struct {
+	uint8_t done : 1;
+	long data_size;
+	uint64_t timeout;
+} udp_state_t;
 
-	char data_buffer[DATA_BUFFER_SIZE] = {0};
-	size_t data_len = mbuspico_get_meterdata_json(data_buffer, DATA_BUFFER_SIZE);
-	if (data_len == 0) {
-		MBUSPICO_LOG_E(LOG_TAG_UDP, "Error retrieving meterdata");
-		return;
-	}
-	char host_ip[] = MBUSPICO_UDP_RECEIVER_HOST;
-	uint16_t port = MBUSPICO_UDP_RECEIVER_PORT;
-	int addr_family = 0;
-	int ip_protocol = 0;
-	
-	struct sockaddr_in dest_addr = {
-		.sin_addr.s_addr = inet_addr(MBUSPICO_UDP_RECEIVER_HOST),
-		.sin_family = AF_INET,
-		.sin_port = htons(port)
-	};
-	
-	int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-	if (sock < 0) {
-		MBUSPICO_LOG_E(LOG_TAG_UDP, "Unable to create socket: errno %d", errno);
-		return;
-	}
-
-	MBUSPICO_LOG_I(LOG_TAG_UDP, "Socket created, sending to %s:%d", MBUSPICO_UDP_RECEIVER_HOST, port);
-	MBUSPICO_LOG_D(LOG_TAG_UDP, "  data length: %d", data_len);
-
-	int err = lwip_sendto(sock, data_buffer, data_len, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-	if (err < 0) {
-		MBUSPICO_LOG_E(LOG_TAG_UDP, "Error occurred during sending: errno %d", errno);
-		return;
-	} else {
-		MBUSPICO_LOG_D(LOG_TAG_UDP, "Message sent: %d", err);
-		last_send = mbuspico_time_ms();
-	}
-	
-	if (sock != -1) {
-		MBUSPICO_LOG_D(LOG_TAG_UDP, "Shutting down socket");
-		lwip_shutdown(sock, SHUT_RDWR);
-		lwip_close(sock);
-	}
+static void mbuspico_send_udp(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
+  	switch (ev) {
+	case MG_EV_OPEN: // Connection created
+		MBUSPICO_LOG_D(LOG_TAG_UDP, "connection event: MG_EV_OPEN");
+    	((udp_state_t*)fn_data)->timeout = mg_millis() + UDP_CONNECT_TIMEOUT;
+		break;
+ 	case MG_EV_POLL:
+    	if (mg_millis() > ((udp_state_t*)fn_data)->timeout &&  (c->is_connecting || c->is_resolving)) {
+			MBUSPICO_LOG_E(LOG_TAG_UDP, "connection timeout");
+			((udp_state_t*) fn_data)->done = 1;
+    	}
+		break;
+  	case MG_EV_CONNECT:
+		{
+			MBUSPICO_LOG_D(LOG_TAG_UDP, "connection event: MG_EV_CONNECT");
+			char data_buffer[DATA_BUFFER_SIZE] = {0};
+			size_t data_size = mbuspico_get_meterdata_json(data_buffer, DATA_BUFFER_SIZE);
+			if (data_size > 0) {
+				((udp_state_t*) fn_data)->data_size = data_size;
+				mg_send(c, data_buffer, data_size);
+			}
+			else {
+				MBUSPICO_LOG_E(LOG_TAG_UDP, "Error retrieving meterdata");
+				((udp_state_t*) fn_data)->done = 1;
+			}
+		}
+		break;
+	case MG_EV_WRITE: // Data written to socket
+		{
+			long* bytes_written = (long*)ev_data;
+			MBUSPICO_LOG_D(LOG_TAG_UDP, "connection event: MG_EV_WRITE (%ld)", *bytes_written);
+			((udp_state_t*) fn_data)->data_size -= *bytes_written;
+			if (((udp_state_t*) fn_data)->data_size <= 0) {
+				((udp_state_t*) fn_data)->done = 1;
+			}
+		}
+		break;
+  	case MG_EV_ERROR:
+		MBUSPICO_LOG_D(LOG_TAG_UDP, "connection event: MG_EV_ERROR");
+		MBUSPICO_LOG_E(LOG_TAG_UDP, "send error: %s", (char*)ev_data);
+		((udp_state_t*) fn_data)->done = 1;
+		break;
+	case MG_EV_CLOSE: // Connection closed
+		MBUSPICO_LOG_D(LOG_TAG_UDP, "connection event: MG_EV_CLOSE");
+    	((udp_state_t*) fn_data)->done = 1;
+		break;
+  	}
 }
 
-static void mbuspico_udp_init() {
+static int mbuspico_udp_init() {
 	MBUSPICO_LOG_D(LOG_TAG_UDP, "mbuspico_udp_init()");
 
 #ifndef MBUSPICO_UDP_RECEIVER_HOST
@@ -77,19 +80,44 @@ static void mbuspico_udp_init() {
 #endif
 #ifndef MBUSPICO_UDP_RECEIVER_PORT
 	#error "MBUSPICO_UDP_RECEIVER_PORT not defined. Not specified via options?"
+#else
+	if (MBUSPICO_UDP_RECEIVER_PORT <= 0) {
+		MBUSPICO_LOG_E(LOG_TAG_UDP, "invalid UDP receiver port provided: '%d'", (uint16_t)MBUSPICO_UDP_RECEIVER_PORT);
+		return 1;
+	}
 #endif
+	return 0;
 }
 
 void mbuspico_udp_task(void* arg) {
 	MBUSPICO_LOG_D(LOG_TAG_UDP, "mbuspico_udp_task()");
 	
-	mbuspico_udp_init();
+	if (mbuspico_udp_init()) {
+		vTaskDelete(NULL);
+		return;
+	}
+
+	char receiver_addr[128] = {0};
+	snprintf(receiver_addr, sizeof(receiver_addr), "udp://%s:%d", MBUSPICO_UDP_RECEIVER_HOST, (uint16_t)MBUSPICO_UDP_RECEIVER_PORT);
 	
 	for(;;) {
-		if (mbuspico_wifi_get_state() == CYW43_LINK_UP) { // connected and assigned IP
-			mbuspico_send_udp();
+		while (mbuspico_wifi_get_state() == CYW43_LINK_UP) { // connected and assigned IP
+			struct mg_mgr mgr;
+			
+			udp_state_t state;
+			memset(&state, sizeof(udp_state_t), 0);
+
+			mg_mgr_init(&mgr);
+  			mg_connect(&mgr, receiver_addr, mbuspico_send_udp, &state);
+  			while (!state.done) {
+				mg_mgr_poll(&mgr, 50);
+			}
+  			mg_mgr_free(&mgr);
+			MBUSPICO_LOG_D(LOG_TAG_UDP, "done");
+
+			vTaskDelay(pdMS_TO_TICKS(send_interval)); 
 		}
-		vTaskDelay(pdMS_TO_TICKS(500));
+		vTaskDelay(pdMS_TO_TICKS(3000)); 
 	}
 }
 

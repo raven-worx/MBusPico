@@ -24,7 +24,9 @@
         "compare": "c",
         "random": "cpp",
         "mbuspico.h": "c",
-        "mbuspico.conf.h": "c"
+        "mbuspico.conf.h": "c",
+        "mongoose.h": "c",
+        "cyw43_arch.h": "c"
     },
     "cmake.configureArgs": [
         "-DMBUSPICO_LOG_LEVEL=LOG_DEBUG",

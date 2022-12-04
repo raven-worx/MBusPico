@@ -7,12 +7,19 @@
 #include <hardware/regs/rosc.h>
 #include <hardware/regs/addressmap.h>
 #include <mbedtls_config.h>
+#include <timers.h>
+#if defined(MBUSPICO_HTTP_ENABLED) || defined(MBUSPICO_UDP_ENABLED) 
+#include <mongoose.h>
+#endif
 
 QueueHandle_t g_DeviceEventQueue = NULL;
 
 static SemaphoreHandle_t g_ValueMutex = NULL;
 static SemaphoreHandle_t g_LogMutex = NULL;
 static MeterData_t g_MeterData;
+
+static TimerHandle_t hRebootTimer = NULL;
+static TimerHandle_t hRebootUsbTimer = NULL;
 
 void mbuspico_print_meterdata(void) {
 	if (xSemaphoreTake(g_ValueMutex, pdMS_TO_TICKS(2000)) == pdTRUE) {
@@ -118,21 +125,100 @@ void mbuspico_set_meterdata(MeterData_t* data) {
 	}
 }
 
+#ifdef MONGOOSE_H
+static void mongoose_log_redirect(char ch, void *param) {
+	static char buf[256];
+	static size_t len = 0;
+	if (ch != '\n') {
+		buf[len++] = ch;
+	}
+	if (ch == '\n' || len >= sizeof(buf)) {
+		MBUSPICO_LOG_D(LOG_TAG_MG, buf);
+		len = 0;
+		memset(buf, sizeof(buf), 0);
+  	}
+}
+#endif
+
 void mbuspico_init(void) {
 	memset(&g_MeterData, 0, sizeof(MeterData_t));
 
-	g_ValueMutex =  xSemaphoreCreateBinary();
+	g_ValueMutex = xSemaphoreCreateBinary();
 	xSemaphoreGive(g_ValueMutex);
 	
-	g_LogMutex =  xSemaphoreCreateBinary();
+	g_LogMutex = xSemaphoreCreateBinary();
 	xSemaphoreGive(g_LogMutex);
 
 	g_DeviceEventQueue = xQueueCreate(15, sizeof(xMBusData_t));
+
+#ifdef MONGOOSE_H
+	mg_log_set_fn(mongoose_log_redirect, NULL);
+
+#if MBUSPICO_LOG_LEVEL >= LOG_DEBUG
+	mg_log_set(MG_LL_DEBUG);
+#elif MBUSPICO_LOG_LEVEL >= LOG_INFO
+	mg_log_set(MG_LL_INFO);
+#elif MBUSPICO_LOG_LEVEL >= LOG_ERROR
+	mg_log_set(MG_LL_ERROR);
+#else
+	mg_log_set(MG_LL_NONE);
+#endif
+#endif
 }
 
-void mbuspico_reset(void) {
-	watchdog_enable(1, 1);
-	while(1) {};
+static void execute_reboot_timer(TimerHandle_t hTimer) {
+	if (hTimer == hRebootTimer) {
+		mbuspico_reboot();
+	}
+	else if (hTimer == hRebootUsbTimer) {
+		mbuspico_reboot_into_bootloader();
+	}
+}
+
+int mbuspico_schedule_reboot(uint32_t ms) {
+	hRebootTimer = xTimerCreate("Reboot_Timer", pdMS_TO_TICKS(ms), pdFALSE, NULL, execute_reboot_timer);
+	if (hRebootTimer == NULL) {
+	#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
+		printf("Failed to create REBOOT Timer!\n");
+	#endif
+	}
+	else {
+		BaseType_t result = xTimerStart(hRebootTimer, 0);
+		if (result == pdPASS) {
+			return 1;
+		}
+		else {
+		#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
+			printf("Failed to start REBOOT Timer!\n");
+		#endif
+			xTimerDelete(hRebootTimer, 0);
+			hRebootTimer = NULL;
+		}
+	}
+	return 0;
+}
+
+int mbuspico_schedule_reboot_usb(uint32_t ms) {
+	hRebootUsbTimer = xTimerCreate("RebootUsb_Timer", pdMS_TO_TICKS(ms), pdFALSE, NULL, execute_reboot_timer);
+	if (hRebootUsbTimer == NULL) {
+	#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
+		printf("Failed to create REBOOT-USB Timer!\n");
+	#endif
+	}
+	else {
+		BaseType_t result = xTimerStart(hRebootUsbTimer, 0);
+		if (result == pdPASS) {
+			return 1;
+		}
+		else {
+		#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
+			printf("Failed to start REBOOT-USB Timer!\n");
+		#endif
+			xTimerDelete(hRebootUsbTimer, 0);
+			hRebootUsbTimer = NULL;
+		}
+	}
+	return 0;
 }
 
 uint64_t mbuspico_time_ms(void) {
@@ -153,6 +239,10 @@ void mbuspico_hex_to_bin(const char* in, size_t len, byte* out) {
 
 	const char* end = in + len;
 	while(in < end) *(out++) = LOOKUP[*(in++)] << 4 | LOOKUP[*(in++)];
+}
+
+void mbuspico_reboot() {
+	watchdog_reboot	(0, 0, 1000);
 }
 
 void mbuspico_reboot_into_bootloader() {
@@ -186,7 +276,8 @@ static void get_log_tag(uint16_t id, char* tag) {
 		case LOG_TAG_DEVICE:	sprintf(tag, "%s", "DEVICE"); break;
 		case LOG_TAG_UART:		sprintf(tag, "%s", "UART"); break;
 		case LOG_TAG_HTTP:		sprintf(tag, "%s", "HTTP"); break;
-		case LOG_TAG_UDP:		sprintf(tag, "%s", "MAIN"); break;
+		case LOG_TAG_UDP:		sprintf(tag, "%s", "UDP"); break;
+		case LOG_TAG_MG:		sprintf(tag, "%s", "MG"); break;
 		default:				sprintf(tag, "%s", "???"); break;
 	}
 }

@@ -1,10 +1,14 @@
 #include <mbuspico.h>
 #include <stdio.h>
 #include <string.h>
-#include "hardware/watchdog.h"
+#include <hardware/watchdog.h>
+#include <timers.h>
 
+#define WD_INTERVAL_MS 5000
+
+TimerHandle_t hWDTimer = NULL;
 // task handles
-TaskHandle_t hWDTask = NULL;
+TaskHandle_t hDbgTask = NULL;
 TaskHandle_t hWifiTask = NULL;
 TaskHandle_t hDeviceTask = NULL;
 TaskHandle_t hUartTask = NULL;
@@ -43,34 +47,25 @@ void printTaskInfo(TaskHandle_t hTask) {
 #endif
 }
 
-void mbuspico_wd_task(void* arg) {
-	#ifndef _DEBUG
-	// enable HW watchdog
-	watchdog_enable(10000, 1);
-	#endif
-
+void mbuspico_dbg_task(void* arg) {
 	for (;;) {
-	#if 0
 		printTaskInfo(hWifiTask);
 		printTaskInfo(hDeviceTask);
 		printTaskInfo(hUartTask);
 		printTaskInfo(hHttpTask);
 		printTaskInfo(hUdpTask);
-	#endif
-
-	#ifndef _DEBUG
-		watchdog_update();
-	#endif
-
-		vTaskDelay(1000/portTICK_PERIOD_MS);
+		vTaskDelay(pdMS_TO_TICKS(1000));
 	}
 }
 
+void trigger_watchdog(TimerHandle_t xTimer) {
+	watchdog_update();
+}
 
 int main() {
 	stdio_init_all();
 	
-	if (watchdog_caused_reboot()) {
+	if (watchdog_enable_caused_reboot()) {
 	#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
         printf("Rebooted by Watchdog!\n");
 	#endif
@@ -80,12 +75,14 @@ int main() {
 	
 	mbuspico_init();
 
-	result = xTaskCreate(mbuspico_wd_task, "WD_Task", configMINIMAL_STACK_SIZE*4, NULL, tskIDLE_PRIORITY+1000, &hWDTask);
+#if 0
+	result = xTaskCreate(mbuspico_dbg_task, "WD_Task", configMINIMAL_STACK_SIZE*4, NULL, tskIDLE_PRIORITY+100, &hDbgTask);
 	if (result != pdPASS) {
 	#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
 		printf("Failed to create DBG task!\n");
 	#endif
 	}
+#endif
 	
 #if MBUSPICO_WIFI_ENABLED
 	result = xTaskCreate(mbuspico_wifi_task, "WIFI_Task", configMINIMAL_STACK_SIZE*6, NULL, tskIDLE_PRIORITY+1, &hWifiTask);
@@ -135,8 +132,28 @@ int main() {
 	#endif
 	}
 #endif
+
+#ifndef _DEBUG
+	// HW watchdog
+	watchdog_enable(WD_INTERVAL_MS, 1);
+
+	hWDTimer = xTimerCreate("WD_Timer",  pdMS_TO_TICKS(WD_INTERVAL_MS-1000), pdTRUE, NULL, trigger_watchdog);
+	if (hWDTimer == NULL) {
+	#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
+		printf("Failed to create WD Timer!\n");
+	#endif
+	}
+	else {
+		result = xTimerStart(hWDTimer, 0);
+		if (result != pdPASS) {
+		#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
+			printf("Failed to start WD Timer!\n");
+		#endif
+		}
+	}
 #endif
 
+	// start timers and tasks
 	vTaskStartScheduler();
 
 	// unreachable

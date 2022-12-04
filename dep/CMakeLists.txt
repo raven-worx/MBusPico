@@ -83,3 +83,26 @@ target_sources(mbedtls_crypto PRIVATE ${mbedtls_src_crypto})
 
 set_target_properties(mbedtls_crypto PROPERTIES COMPILE_FLAGS "-I${PROJECT_SOURCE_DIR}/include -DMBEDTLS_CONFIG_FILE=\"<mbedtls_config.h>\"")
 target_include_directories(mbedtls_crypto PUBLIC ${CMAKE_CURRENT_LIST_DIR}/mbedtls/include ${CMAKE_CURRENT_LIST_DIR}/mbedtls/library)
+
+
+#
+# mongoose
+#
+add_library(mongoose STATIC)
+target_sources(mongoose PRIVATE ${CMAKE_CURRENT_LIST_DIR}/mongoose/mongoose.c)
+
+set_target_properties(mongoose PROPERTIES COMPILE_FLAGS "-DMG_ARCH=MG_ARCH_FREERTOS_LWIP -DMG_ENABLE_LWIP=1")
+
+target_include_directories(mongoose 
+PUBLIC
+	${CMAKE_CURRENT_LIST_DIR}/mongoose
+)
+
+target_link_libraries(mongoose
+PRIVATE
+	pico_cyw43_arch_lwip_sys_freertos
+	pico_stdlib
+	FreeRTOS-Kernel-Heap4
+)
+
+

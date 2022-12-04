@@ -41,9 +41,11 @@ void mbuspico_set_meterdata(MeterData_t* data);
 
 // global interface
 void mbuspico_init(void);
-void mbuspico_reset(void);
+int mbuspico_schedule_reboot(uint32_t ms);
+int mbuspico_schedule_reboot_usb(uint32_t ms);
 uint64_t mbuspico_time_ms(void);
 void mbuspico_hex_to_bin(const char* in, size_t len, unsigned char* out);
+void mbuspico_reboot();
 void mbuspico_reboot_into_bootloader();
 
 // UART data queue
@@ -92,6 +94,7 @@ void mbuspico_udp_task(void*);
 #define LOG_TAG_UART	(1<<3)
 #define LOG_TAG_HTTP	(1<<4)
 #define LOG_TAG_UDP		(1<<5)
+#define LOG_TAG_MG		(1<<6)
 
 #define LOG_TAG_ALL		(0xFFFF)
 

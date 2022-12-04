@@ -1,5 +1,5 @@
-#ifndef _LWIPOPTS_EXAMPLE_COMMONH_H
-#define _LWIPOPTS_EXAMPLE_COMMONH_H
+#ifndef _LWIPOPTS_H
+#define _LWIPOPTS_H
 
 // not necessary, can be done either way
 #define LWIP_TCPIP_CORE_LOCKING_INPUT 1
@@ -7,20 +7,7 @@
 // (see https://www.nongnu.org/lwip/2_1_x/group__lwip__opts.html for details)
 
 #ifndef NO_SYS
-#define NO_SYS                      0
-#define TCPIP_THREAD_STACKSIZE      1024
-#define DEFAULT_THREAD_STACKSIZE    1024
-#define DEFAULT_RAW_RECVMBOX_SIZE   8
-#define TCPIP_MBOX_SIZE             8
-#if _BUILD_HOST_WINDOWS
-# define LWIP_TIMEVAL_PRIVATE        1
-#else
-# define LWIP_TIMEVAL_PRIVATE        0
-#endif
-
-#define DEFAULT_UDP_RECVMBOX_SIZE TCPIP_MBOX_SIZE
-#define DEFAULT_TCP_RECVMBOX_SIZE TCPIP_MBOX_SIZE
-#define DEFAULT_ACCEPTMBOX_SIZE TCPIP_MBOX_SIZE
+# define NO_SYS                      0
 #endif
 
 #ifndef LWIP_SOCKET
@@ -33,9 +20,10 @@
 #define MEM_LIBC_MALLOC             0
 #endif
 #define MEM_ALIGNMENT               4
-#define MEM_SIZE                    4000
+#define MEM_SIZE                    6000
 #define MEMP_NUM_TCP_SEG            32
 #define MEMP_NUM_ARP_QUEUE          10
+#define MEMP_NUM_NETCONN            10
 #define PBUF_POOL_SIZE              24
 #define LWIP_ARP                    1
 #define LWIP_ETHERNET               1
@@ -100,4 +88,29 @@
 #define SLIP_DEBUG                  LWIP_DBG_OFF
 #define DHCP_DEBUG                  LWIP_DBG_OFF
 
-#endif /* __LWIPOPTS_H__ */
+
+#if !NO_SYS
+
+#include "FreeRTOS.h"
+#include "task.h"
+
+#define LWIP_TIMEVAL_PRIVATE  0
+
+#define LWIP_FREERTOS_THREAD_STACKSIZE_IS_STACKWORDS  0
+#define TCPIP_THREAD_PRIO (tskIDLE_PRIORITY + 1UL)
+#define TCPIP_THREAD_STACKSIZE 1024
+#define DEFAULT_THREAD_PRIO (tskIDLE_PRIORITY + 2UL)
+#define DEFAULT_THREAD_STACKSIZE 1024
+#define DEFAULT_RAW_RECVMBOX_SIZE 8
+#define TCPIP_MBOX_SIZE 16
+
+#define DEFAULT_UDP_RECVMBOX_SIZE TCPIP_MBOX_SIZE
+#define DEFAULT_TCP_RECVMBOX_SIZE TCPIP_MBOX_SIZE
+#define DEFAULT_ACCEPTMBOX_SIZE TCPIP_MBOX_SIZE
+
+// not necessary, can be done either way
+#define LWIP_TCPIP_CORE_LOCKING_INPUT 1
+
+#endif
+
+#endif // _LWIPOPTS_H
