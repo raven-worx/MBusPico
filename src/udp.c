@@ -29,7 +29,10 @@ static void mbuspico_send_udp() {
 
 	char data_buffer[DATA_BUFFER_SIZE] = {0};
 	size_t data_len = mbuspico_get_meterdata_json(data_buffer, DATA_BUFFER_SIZE);
-
+	if (data_len == 0) {
+		MBUSPICO_LOG_E(LOG_TAG_UDP, "Error retrieving meterdata");
+		return;
+	}
 	char host_ip[] = MBUSPICO_UDP_RECEIVER_HOST;
 	uint16_t port = MBUSPICO_UDP_RECEIVER_PORT;
 	int addr_family = 0;
@@ -86,7 +89,7 @@ void mbuspico_udp_task(void* arg) {
 		if (mbuspico_wifi_get_state() == CYW43_LINK_UP) { // connected and assigned IP
 			mbuspico_send_udp();
 		}
-		vTaskDelay(100/portTICK_PERIOD_MS);
+		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 }
 

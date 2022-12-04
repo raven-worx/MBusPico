@@ -15,4 +15,4 @@ fi
 
 cd "$BUILD_DIR"
 cmake "$SOURCE_DIR" -DCMAKE_BUILD_TYPE=Release
-cmake --build .
+cmake --build . --parallel $(nproc)

@@ -88,7 +88,7 @@ void mbuspico_wifi_task(void* arg) {
 			}
 		}
 
-		vTaskDelay(3000/portTICK_PERIOD_MS); // retry / check again in 3 secs
+		vTaskDelay(pdMS_TO_TICKS(3000)); // retry / check again in 3 secs
 	}
 }
 

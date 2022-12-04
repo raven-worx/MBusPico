@@ -1,6 +1,6 @@
 # MBusPico
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](/LICENSE)
 
 This project was created mostly out of interest and the wish to read out and display my power meter data in my Loxone smart home setup. (Thus the option with the 24V power supply - see below)
 
@@ -62,7 +62,6 @@ The software for the Pico W microcontroller is written in C using
 * pico-sdk
 * FreeRTOS
 * mbedtls
-* mongoose
 
 ## Build
 
@@ -151,4 +150,4 @@ You can find the files in the `3d` folder of this repository.
 
 # License
 
-Licensed under [GPLv3](https://github.com/raven-worx/loveboxpi/blob/master/LICENSE)
+Licensed under [GPLv3](/LICENSE)

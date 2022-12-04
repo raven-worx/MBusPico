@@ -15,7 +15,7 @@ static SemaphoreHandle_t g_LogMutex = NULL;
 static MeterData_t g_MeterData;
 
 void mbuspico_print_meterdata(void) {
-	if (xSemaphoreTake(g_ValueMutex, portMAX_DELAY) == pdTRUE) {
+	if (xSemaphoreTake(g_ValueMutex, pdMS_TO_TICKS(2000)) == pdTRUE) {
 		MBUSPICO_LOG_D(LOG_TAG_MAIN,
 				"\n"
 				"Timestamp: %s" "\n"
@@ -54,12 +54,15 @@ void mbuspico_print_meterdata(void) {
 			);
 		xSemaphoreGive(g_ValueMutex);
 	}
+	else {
+		MBUSPICO_LOG_D(LOG_TAG_MAIN, "Failed to aquire semaphore in mbuspico_print_meterdata()");
+	}
 }
 
 size_t mbuspico_get_meterdata_json(char* data_buffer, size_t buffer_size) {
 	size_t data_len = 0;
 	MBUSPICO_LOG_D(LOG_TAG_MAIN, "mbuspico_get_meterdata_json() called");
-	if (xSemaphoreTake(g_ValueMutex, portMAX_DELAY) == pdTRUE) {
+	if (xSemaphoreTake(g_ValueMutex, pdMS_TO_TICKS(2000)) == pdTRUE) {
 		data_len = snprintf(
 				data_buffer, buffer_size,
 				"{" "\n"
@@ -96,14 +99,14 @@ size_t mbuspico_get_meterdata_json(char* data_buffer, size_t buffer_size) {
 		xSemaphoreGive(g_ValueMutex);
 	}
 	else {
-		MBUSPICO_LOG_E(LOG_TAG_MAIN, "failed to aquire mutex in mbuspico_get_meterdata_json()");
+		MBUSPICO_LOG_E(LOG_TAG_MAIN, "Failed to aquire semaphore in mbuspico_get_meterdata_json()");
 	}
 	return data_len;
 }
 
 void mbuspico_set_meterdata(MeterData_t* data) {
 	MBUSPICO_LOG_D(LOG_TAG_MAIN, "mbuspico_set_meterdata() called");
-	if (xSemaphoreTake(g_ValueMutex, portMAX_DELAY) == pdTRUE) {
+	if (xSemaphoreTake(g_ValueMutex, pdMS_TO_TICKS(2000)) == pdTRUE) {
 		memcpy(&g_MeterData, data, sizeof(MeterData_t));
 		xSemaphoreGive(g_ValueMutex);
 #if MBUSPICO_LOG_LEVEL >= MBUSPICO_LOG_DEBUG
@@ -111,7 +114,7 @@ void mbuspico_set_meterdata(MeterData_t* data) {
 #endif
 	}
 	else {
-		MBUSPICO_LOG_E(LOG_TAG_MAIN, "failed to aquire mutex in mbuspico_set_meterdata()");
+		MBUSPICO_LOG_E(LOG_TAG_MAIN, "Failed to aquire semaphore in mbuspico_set_meterdata()");
 	}
 }
 
@@ -190,7 +193,7 @@ static void get_log_tag(uint16_t id, char* tag) {
 
 #if MBUSPICO_LOG_LEVEL >= LOG_ERROR
 void MBUSPICO_LOG_E(uint16_t id, const char* format, ...) {
-	if (LOG_FILTER & id && xSemaphoreTake(g_LogMutex, portMAX_DELAY) == pdTRUE) {
+	if (LOG_FILTER & id && xSemaphoreTake(g_LogMutex, pdMS_TO_TICKS(3000)) == pdTRUE) {
 		char tag[10];
 		get_log_tag(id,tag);
 		va_list args;
@@ -206,7 +209,7 @@ void MBUSPICO_LOG_E(uint16_t id, const char* format, ...) {
 
 #if MBUSPICO_LOG_LEVEL >= LOG_INFO
 void MBUSPICO_LOG_I(uint16_t id, const char* format, ...) {
-	if (LOG_FILTER & id && xSemaphoreTake(g_LogMutex, portMAX_DELAY) == pdTRUE) {
+	if (LOG_FILTER & id && xSemaphoreTake(g_LogMutex, pdMS_TO_TICKS(3000)) == pdTRUE) {
 		char tag[10];
 		get_log_tag(id,tag);
 		va_list args;
@@ -222,7 +225,7 @@ void MBUSPICO_LOG_I(uint16_t id, const char* format, ...) {
 
 #if MBUSPICO_LOG_LEVEL >= LOG_DEBUG
 void MBUSPICO_LOG_D(uint16_t id, const char* format, ...) {
-	if (LOG_FILTER & id && xSemaphoreTake(g_LogMutex, portMAX_DELAY) == pdTRUE) {
+	if (LOG_FILTER & id && xSemaphoreTake(g_LogMutex, pdMS_TO_TICKS(3000)) == pdTRUE) {
 		char tag[10];
 		get_log_tag(id,tag);
 		va_list args;

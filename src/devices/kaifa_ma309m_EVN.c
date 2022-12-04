@@ -204,7 +204,7 @@ static time_t timestamp_to_lx(uint16_t year, uint8_t month, uint8_t day, uint8_t
 }
 
 static int available(xMBusData_t* data) {
-	return xQueueReceive(g_DeviceEventQueue, data, 0) == pdPASS ? 1: 0;
+	return xQueueReceive(g_DeviceEventQueue, data, 0) == pdPASS ? 1 : 0;
 }
 
 static void loop() {
@@ -579,11 +579,12 @@ void mbuspico_device_task(void* arg) {
 	MBUSPICO_LOG_D(LOG_TAG_DEVICE, "mbuspico_device_task()");
 
 	if (mbuspico_device_init()) {
+		vTaskDelete(NULL);
 		return;
 	}
 	
 	for (;;) {
 		loop();
-		vTaskDelay(50/portTICK_PERIOD_MS);
+		vTaskDelay(pdMS_TO_TICKS(50));
 	}
 }

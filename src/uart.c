@@ -71,6 +71,6 @@ void mbuspico_uart_task(void* arg) {
 	mbuspico_uart_init();
 	
 	for (;;) {
-		vTaskDelay(50/portTICK_PERIOD_MS);
+		vTaskDelay(pdMS_TO_TICKS(100));
 	}
 }
