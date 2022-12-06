@@ -1,5 +1,6 @@
 # MBusPico
 
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/raven-worx/mbuspico?logo=github&sort=semver)](https://github.com/raven-worx/mbuspico/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](/LICENSE)
 
 This project was created mostly out of interest and the wish to read out and display my power meter data in my Loxone smart home setup. (Thus the option with the 24V power supply - see below)
@@ -59,14 +60,14 @@ The read meter data values are published via HTTP and/or UDP in JSON format:
 ## Software
 
 The software for the Pico W microcontroller is written in C using
-* pico-sdk
-* FreeRTOS
-* mbedtls
-* mongoose
+* [pico-sdk](https://github.com/raspberrypi/pico-sdk)
+* [FreeRTOS](https://github.com/FreeRTOS/FreeRTOS-Kernel)
+* [mbedtls](https://github.com/Mbed-TLS/mbedtls)
+* [mongoose](https://github.com/cesanta/mongoose)
 
 ## Build
 
-1. Checkout repository: `git clone --recurse-submodules https://github.com/raven-worx/MBusPico.git`
+1. Download and extract [latest release archive](https://github.com/raven-worx/mbuspico/releases) - or clone repository: `git clone --recurse-submodules https://github.com/raven-worx/MBusPico.git`
 2. Edit build options (see below) in `options.ini` to configure MBusPico application to your needs
 3. start building (e.g. using Docker - see below)
 
