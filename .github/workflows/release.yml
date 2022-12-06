@@ -48,7 +48,7 @@ jobs:
       - name: Create archive tar
         run: |
           mkdir -p dist/zip
-          tar czvf dist/$ARCHIVE_NAME --exclude-vcs --exclude-vcs-ignore --exclude dist .
+          tar czvf dist/$ARCHIVE_NAME --exclude-vcs --exclude-vcs-ignore --exclude='dist' .
           tar xzvf dist/$ARCHIVE_NAME -C dist/zip
         env:
           ARCHIVE_NAME: ${{ steps.version.outputs.archive_filename_tar }}
