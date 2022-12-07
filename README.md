@@ -80,7 +80,7 @@ If you do not have a checkout of the pico-sdk yet, you can instead add the optio
 
 ### Windows
 
-For Windows i recommend using Docker for a quick and painless build.
+For Windows i recommend using [Docker](https://docs.docker.com/get-docker/) for a quick and painless build.
 
 Create a (local) docker image with the file provided in the `docker` folder of this repository:
 ```console
@@ -105,13 +105,23 @@ docker run -v ${PWD}:/opt/mbuspico mbuspico/build
 | MBUSPICO_UDP_RECEIVER_HOST |          | yes, if MBUSPICO_UDP_ENABLED | the UDP receiver address the meter data packet should be send to |
 | MBUSPICO_UDP_RECEIVER_PORT |          | yes, if MBUSPICO_UDP_ENABLED | the UDP receiver port the meter data packet should be send to |
 | MBUSPICO_UDP_INTERVAL_S | 30          | no                      | the maximum interval [sec] the meter data should be send out via UDP |
-| MBUSPICO_HTTP_ENABLED  | ON           | no                      | specifies if the device should launch a simple HTTP server to provide the read meter data |
+| MBUSPICO_HTTP_ENABLED | ON            | no                      | specifies if the device should launch a simple HTTP server to provide the read meter data |
 | MBUSPICO_HTTP_SERVER_PORT  | 80       | no                      | specifies the listening port for the HTTP webserver |
 
 # Transfer MBusPico onto the device
 
 Hold the BOOTSEL button on the Pico W while connecting it to the PC via a USB cable. Since v1.2 its also possible to call `http://<ip-address>/update` to restart into the bootloader (if built with HTTP option).
 The Pico will show up as a flash drive. Copy the `mbuspico.uf2` file from the build directory to the appeared flash drive. The Pico W will automatically reboot into the just flashed firmware after copying has finished. Done.
+
+# HTTP endpoints
+
+When built with `MBUSPICO_HTTP_ENABLED` option enabled the following HTTP endpoints are provided.
+
+| **Method**    | **Endpoint URL**      | **Description**    |
+| --------------| --------------------- | ------------------ |
+| GET           | /                     | Return last read meter data in JSON format |
+| GET           | /update               | Reboot device into USB bootloader for a quick and easy update of MBusPico application |
+| GET           | /reboot               | Reboot device      |
 
 # Hardware wiring / assembly
 
