@@ -107,6 +107,8 @@ docker run -v ${PWD}:/opt/mbuspico mbuspico/build
 | MBUSPICO_UDP_INTERVAL_S | 30          | no                      | the maximum interval [sec] the meter data should be send out via UDP |
 | MBUSPICO_HTTP_ENABLED | ON            | no                      | specifies if the device should launch a simple HTTP server to provide the read meter data |
 | MBUSPICO_HTTP_SERVER_PORT  | 80       | no                      | specifies the listening port for the HTTP webserver |
+| MBUSPICO_HTTP_AUTH_USER |             | no                      | Protect access to data with authentication
+| MBUSPICO_HTTP_AUTH_PWD |              | no                      | Protect access to data with authentication
 
 # Transfer MBusPico onto the device
 

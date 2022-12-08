@@ -15,3 +15,5 @@
 
 #cmakedefine01 MBUSPICO_HTTP_ENABLED
 #cmakedefine MBUSPICO_HTTP_SERVER_PORT @MBUSPICO_HTTP_SERVER_PORT@ // optional, default 80
+#cmakedefine MBUSPICO_HTTP_AUTH_USER "@MBUSPICO_HTTP_AUTH_USER@" // optional
+#cmakedefine MBUSPICO_HTTP_AUTH_PWD "@MBUSPICO_HTTP_AUTH_PWD@" // optional

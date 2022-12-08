@@ -18,7 +18,8 @@ cmake_dependent_option(MBUSPICO_UDP_INTERVAL_S "UDP send interval [s]" 30 "MBUSP
 # HTTP SERVER
 cmake_dependent_option(MBUSPICO_HTTP_ENABLED "Enable HTTP server" ON "MBUSPICO_WIFI_ENABLED" OFF)
 cmake_dependent_option(MBUSPICO_HTTP_SERVER_PORT "HTTP server port" 80 "MBUSPICO_WIFI_ENABLED;MBUSPICO_HTTP_ENABLED" 80)
-
+cmake_dependent_option(MBUSPICO_HTTP_AUTH_USER "HTTP Authentication user" "" "MBUSPICO_WIFI_ENABLED;MBUSPICO_HTTP_ENABLED" "")
+cmake_dependent_option(MBUSPICO_HTTP_AUTH_PWD "HTTP Authentication password" "" "MBUSPICO_WIFI_ENABLED;MBUSPICO_HTTP_ENABLED" "")
 
 #
 # INIT OPTIONS FROM FILE
