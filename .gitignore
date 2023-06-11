@@ -101,3 +101,5 @@ dkms.conf
 
 # Ignore code-workspaces
 *.code-workspace
+
+*.pyc
