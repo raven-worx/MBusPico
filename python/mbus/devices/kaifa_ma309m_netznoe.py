@@ -1,4 +1,5 @@
 from . import _mbusdevice
+from .. import meterdata
 import binascii
 import datetime
 import math
@@ -112,7 +113,10 @@ _ESPDM_REACTIVE_ENERGY_MINUS = bytes([0x04, 0x08])
 
 
 class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
-	def parse_data(self,data,key,meterdata):
+	def __init__(self, key):
+		self._key = binascii.unhexlify(key)
+	
+	def parse_data(self,data):
 		if len(data) < 256:
 			print("Received packet with invalid size:", data.length, "< 256")
 			return False
@@ -142,13 +146,15 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 		ciphertext += data[_DLMS_HEADER1_END:_DLMS_HEADER1_END+payloadLength1]
 		ciphertext += data[_DLMS_HEADER2_END:_DLMS_HEADER2_END+payloadLength2]
 		
-		plaintext = self._decrypt_aes_gcm(binascii.unhexlify(key), ciphertext, iv)
+		plaintext = self._decrypt_aes_gcm(self._key, ciphertext, iv)
 		
 		if plaintext[0] != 0x0F or plaintext[5] != 0x0C:
 			print("Packet was decrypted but data is invalid")
 			return False
 		
 		# Decoding
+		
+		meter = meterdata.MeterData()
 		
 		currentPosition = _DECODER_START_OFFSET # Offset for start of OBIS decoding, skip header, timestamp and break block
 		
@@ -244,17 +250,17 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 				dataLength = 4
 				dataValue = int.from_bytes(plaintext[currentPosition:currentPosition+dataLength], 'big')
 				if codeType == _CodeType_ActivePowerPlus:
-					meterdata.activePowerPlus = dataValue
+					meter.activePowerPlus = dataValue
 				elif codeType == _CodeType_ActivePowerMinus:
-					meterdata.activePowerMinus = dataValue
+					meter.activePowerMinus = dataValue
 				elif codeType == _CodeType_ActiveEnergyPlus:
-					meterdata.activeEnergyPlus = dataValue
+					meter.activeEnergyPlus = dataValue
 				elif codeType == _CodeType_ActiveEnergyMinus:
-					meterdata.activeEnergyMinus = dataValue
+					meter.activeEnergyMinus = dataValue
 				elif codeType == _CodeType_ReactiveEnergyPlus:
-					meterdata.reactiveEnergyPlus = dataValue
+					meter.reactiveEnergyPlus = dataValue
 				elif codeType == _CodeType_ReactiveEnergyMinus:
-					meterdata.reactiveEnergyMinus = dataValue
+					meter.reactiveEnergyMinus = dataValue
 			elif dataType == _DataType_LongUnsigned:
 				dataLength = 2
 				dataValue = int.from_bytes(plaintext[currentPosition:currentPosition+dataLength], 'big')
@@ -266,19 +272,19 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 					dataValue = dataValue # No decimal places
 				
 				if codeType == _CodeType_VoltageL1:
-					meterdata.voltageL1 = dataValue
+					meter.voltageL1 = dataValue
 				elif codeType == _CodeType_VoltageL2:
-					meterdata.voltageL2 = dataValue
+					meter.voltageL2 = dataValue
 				elif codeType == _CodeType_VoltageL3:
-					meterdata.voltageL3 = dataValue
+					meter.voltageL3 = dataValue
 				elif codeType == _CodeType_CurrentL1:
-					meterdata.currentL1 = dataValue
+					meter.currentL1 = dataValue
 				elif codeType == _CodeType_CurrentL2:
-					meterdata.currentL2 = dataValue
+					meter.currentL2 = dataValue
 				elif codeType == _CodeType_CurrentL3:
-					meterdata.currentL3 = dataValue
+					meter.currentL3 = dataValue
 				elif codeType == _CodeType_PowerFactor:
-					meterdata.powerFactor = dataValue
+					meter.powerFactor = dataValue
 			elif dataType == _DataType_OctetString:
 				print("Arrived on OctetString")
 				print("currentPosition:", currentPosition, "plaintext:", plaintext[currentPosition])
@@ -294,12 +300,12 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 					minute = plaintext[currentPosition+6]
 					seconds = plaintext[currentPosition+7]
 					ts = datetime.datetime(year,month,day,hour,minute,seconds)
-					meterdata.timestamp = ts.strftime("%Y-%m-%dT%H:%M:%SZ")
-					meterdata.lxTimestamp = math.floor((ts - datetime.datetime(2009,1,1,0,0,0)).total_seconds())
-					print("Timestamp:", meterdata.timestamp, "lxts:", meterdata.lxTimestamp)
+					meter.timestamp = ts.strftime("%Y-%m-%dT%H:%M:%SZ")
+					meter.lxTimestamp = math.floor((ts - datetime.datetime(2009,1,1,0,0,0)).total_seconds())
+					print("Timestamp:", meter.timestamp, "lxts:", meter.lxTimestamp)
 				elif codeType == _CodeType_MeterNumber:
-					meterdata.meterNumber = plaintext[currentPosition:currentPosition+dataLength+1].decode('utf8')
-					print("Constructed MeterNumber:", meterdata.meterNumber)
+					meter.meterNumber = plaintext[currentPosition:currentPosition+dataLength+1].decode('utf8')
+					print("Constructed MeterNumber:", meter.meterNumber)
 			else:
 				print("Unsupported OBIS data type")
 				return False
@@ -317,4 +323,4 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 				# on EVN Meters the additional data (no additional Break) is only 3 Bytes + 1 Byte for the "there is data" Byte
 				currentPosition += 4 # Skip additional data and additional break; this will jump out of bounds on last frame
 		
-		return True
+		return meter

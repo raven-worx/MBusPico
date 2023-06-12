@@ -1,11 +1,17 @@
 import sys
 from . import meterdata
 
+if sys.implementation.name == "micropython":
+	import uasyncio as asyncio
+	import utime as time
+else:
+	import asyncio
+	import time
+
 _SERIAL = None
 
 # MICROPYTHON
 if sys.implementation.name == "micropython":
-	# https://github.com/raspberrypi/pico-micropython-examples/blob/master/uart/loopback/uart.py
 	from machine import UART, Pin
 	from ._datetime import datetime
 	
@@ -24,14 +30,11 @@ if sys.implementation.name == "micropython":
 		while _SERIAL.any() > 0:
 			d += _SERIAL.read(1)
 		return d
-	
 # PYTHON
 else:
-	# https://stackoverflow.com/a/16078029
 	import serial
 	import os
 	from datetime import datetime
-	from Cryptodome.Cipher import AES
 	
 	#
 	# UART
@@ -50,12 +53,16 @@ else:
 		return _SERIAL.read()
 
 
-def serial_loop():
+async def uart_init():
+	print("initializing UART")
 	_uart_init()
-	while True:
-		data = _uart_read()
-		if data.length > 0:
-			_parse_data(data)
 
-def serial_exit():
-	pass # exit loop
+async def uart_read():
+	lastRead = time.ticks_ms()
+	data = bytes()
+	while (lastRead - time.ticks_ms()) < 2000:
+		chunk = _uart_read()
+		if len(chunk) > 0:
+			lastRead = time.ticks_ms()
+			data += chunk
+	return data
