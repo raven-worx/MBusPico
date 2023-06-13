@@ -6,8 +6,20 @@ import sys
 
 if sys.implementation.name == "micropython":
 	import uasyncio as asyncio
+	import network
 else:
 	import asyncio
+
+async def connect_wifi(wlan,ssid,password):
+	if sys.implementation.name != "micropython":
+		return
+	if wlan.isconnected():
+		return
+	wlan.connect(ssid, password)
+	while wlan.isconnected() == False:
+		print('Waiting for wifi connection...')
+		await asyncio.sleep(1.5) # [s]
+	print("WIFI:", wlan.ifconfig())
 
 
 async def handler_task():
@@ -15,7 +27,18 @@ async def handler_task():
 
 	await serial.uart_init()
 	
+	
+	if config.MBUSPICO_WIFI_ENABLED and sys.implementation.name == "micropython":
+		wifi_hostname = config.MBUSPICO_WIFI_HOSTNAME if config.MBUSPICO_WIFI_HOSTNAME else "MBusPico"
+		network.hostname(wifi_hostname)
+		wlan = network.WLAN(network.STA_IF)
+		wlan.config(hostname=wifi_hostname)
+		wlan.active(True)
+	
 	while True:
+		if config.MBUSPICO_WIFI_ENABLED and sys.implementation.name == "micropython":
+			await connect_wifi(wlan, config.MBUSPICO_WIFI_SSID, config.MBUSPICO_WIFI_PWD)
+		
 		# read serial data
 		#data = await serial.uart_read()
 		if len(data) > 0:
@@ -29,7 +52,7 @@ async def handler_task():
 				print("parsing meter data failed")
 			data = bytes()
 		else:
-			await asyncio.sleep(1) # 1s
+			await asyncio.sleep(1) # [s]
 
 async def main():
 	tasks = []
@@ -38,7 +61,6 @@ async def main():
 		tasks.append(asyncio.create_task(udp.run(config))) # udp sender
 	if config.MBUSPICO_HTTP_ENABLED:
 		tasks.append(asyncio.create_task(www.run(config))) # webserver
-	
 	
 	tasks.append(asyncio.create_task(handler_task())) # uart handler
 	

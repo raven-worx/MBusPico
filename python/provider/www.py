@@ -61,7 +61,6 @@ async def run(config):
 	global _AUTH_BASIC
 	if config.MBUSPICO_HTTP_AUTH_USER != "" or config.MBUSPICO_HTTP_AUTH_PWD != "":
 		_AUTH_BASIC = base64.b64encode((config.MBUSPICO_HTTP_AUTH_USER + ":" + config.MBUSPICO_HTTP_AUTH_PWD).encode('utf-8')).decode('ascii')
-		print("AUTH:", _AUTH_BASIC)
 	await app.start_server(host='0.0.0.0', port=config.MBUSPICO_HTTP_SERVER_PORT, debug=True, ssl=None)
 
 async def stop():

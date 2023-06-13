@@ -1,3 +1,8 @@
+#
+# taken from:
+# https://github.com/micropython/micropython-lib/blob/master/python-stdlib/datetime/datetime.py
+#
+
 # datetime.py
 
 import time as _tmod
