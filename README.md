@@ -59,13 +59,20 @@ The read meter data values are published via HTTP and/or UDP in JSON format:
 
 ## Software
 
-The software for the Pico W microcontroller is written in C using
+There are two versions of MBusPico available:
+
+There is a native Raspberry Pico application written in C using the following components:
 * [pico-sdk](https://github.com/raspberrypi/pico-sdk)
 * [FreeRTOS](https://github.com/FreeRTOS/FreeRTOS-Kernel)
 * [mbedtls](https://github.com/Mbed-TLS/mbedtls)
 * [mongoose](https://github.com/cesanta/mongoose)
 
-## Build
+And (since v2.0) there is also a Python/Micropython version available, using the following moduls:
+* [microdot](https://github.com/miguelgrinberg/microdot)
+* PySerial
+* PyCryptodome
+
+## Build (native application)
 
 1. Download and extract [latest release archive](https://github.com/raven-worx/mbuspico/releases) - or clone repository: `git clone --recurse-submodules https://github.com/raven-worx/MBusPico.git`
 2. Edit build options (see below) in `options.ini` to configure MBusPico application to your needs
@@ -110,10 +117,16 @@ docker run -v ${PWD}:/opt/mbuspico mbuspico/build
 | MBUSPICO_HTTP_AUTH_USER |             | no                      | Protect access to data with authentication
 | MBUSPICO_HTTP_AUTH_PWD |              | no                      | Protect access to data with authentication
 
-# Transfer MBusPico onto the device
+## Transfer MBusPico onto the device
+
+### Native application
 
 Hold the BOOTSEL button on the Pico W while connecting it to the PC via a USB cable. Since v1.2 its also possible to call `http://<ip-address>/update` to restart into the bootloader (if built with HTTP option).
 The Pico will show up as a flash drive. Copy the `mbuspico.uf2` file from the build directory to the appeared flash drive. The Pico W will automatically reboot into the just flashed firmware after copying has finished. Done.
+
+### MicroPython application
+
+[TODO]
 
 # HTTP endpoints
 
@@ -151,13 +164,7 @@ Power supply (24V):
 
 # Loxone integration
 
-The folder `loxone` contains a ready made HTTP VI template file for quick integration into Loxone Config.
-
-[<img src="/loxone/config.png?raw=true" width="600"/>](/loxone/config.png?raw=true)
-
-Visualization in Loxone App:
-
-[<img src="/loxone/app.png?raw=true" width="200"/>](/loxone/app.png?raw=true)
+Read [loxone/README.md](loxone/README.md)
 
 # 3D printer files
 
