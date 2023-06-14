@@ -35,11 +35,11 @@ jobs:
         run: |
           ver=${VERSION_REF##*/}
           if [[ "$ver" =~ ^v([0-9]+).([0-9]+) ]]; then
-            echo "::set-output name=version::$ver"
-            echo "::set-output name=version_num::${ver:1}"
+            echo "version=$ver" >> $GITHUB_OUTPUT
+            echo "version_num=${ver:1}" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=version::v0.0"
-            echo "::set-output name=version_num::0.0"
+            echo "version=v0.0" >> $GITHUB_OUTPUT
+            echo "version_num=0.0" >> $GITHUB_OUTPUT
           fi
         env:
           VERSION_REF: ${{ github.ref }}
