@@ -1,6 +1,6 @@
 # Python runtime image to execute MBusPico
 
-FROM python:3.9.17-slim
+FROM --platform=$TARGETPLATFORM python:3.10.12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PIP_DEFAULT_TIMEOUT=100 \
