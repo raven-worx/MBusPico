@@ -1,5 +1,4 @@
 import sys
-from . import meterdata
 
 if sys.implementation.name == "micropython":
 	import uasyncio as asyncio
@@ -12,8 +11,8 @@ _SERIAL = None
 
 # MICROPYTHON
 if sys.implementation.name == "micropython":
+	# https://github.com/raspberrypi/pico-micropython-examples/blob/master/uart/loopback/uart.py
 	from machine import UART, Pin
-	from ._datetime import datetime
 	
 	def _uart_init():
 		_SERIAL = UART(1,
@@ -32,6 +31,7 @@ if sys.implementation.name == "micropython":
 		return d
 # PYTHON
 else:
+	# https://stackoverflow.com/a/16078029
 	import serial
 	import os
 	from datetime import datetime
@@ -41,7 +41,7 @@ else:
 	#
 	def _uart_init():
 		_SERIAL = serial.Serial(
-			port=os.getenv('UART_PORT'),
+			port=os.getenv('UART_PORT'), # TODO
 			baudrate=2400,
 			parity=serial.PARITY_EVEN,
 			stopbits=serial.STOPBITS_ONE,

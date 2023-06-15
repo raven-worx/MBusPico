@@ -1,8 +1,13 @@
 from . import _mbusdevice
 from .. import meterdata
 import binascii
-import datetime
 import math
+import sys
+
+if sys.implementation.name == "micropython":
+	from mbus._mp_datetime import datetime
+else:
+	import datetime
 
 _DLMS_HEADER1_START = 0 # Start of first DLMS header
 _DLMS_HEADER1_LENGTH = 26
@@ -299,9 +304,9 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 					hour = plaintext[currentPosition+5]
 					minute = plaintext[currentPosition+6]
 					seconds = plaintext[currentPosition+7]
-					ts = datetime.datetime(year,month,day,hour,minute,seconds)
-					meter.timestamp = ts.strftime("%Y-%m-%dT%H:%M:%SZ")
-					meter.lxTimestamp = math.floor((ts - datetime.datetime(2009,1,1,0,0,0)).total_seconds())
+					ts = datetime(year,month,day,hour,minute,seconds)
+					meter.timestamp = self.strftime(ts)
+					meter.lxTimestamp = math.floor((ts - datetime(2009,1,1,0,0,0)).total_seconds())
 					print("Timestamp:", meter.timestamp, "lxts:", meter.lxTimestamp)
 				elif codeType == _CodeType_MeterNumber:
 					meter.meterNumber = plaintext[currentPosition:currentPosition+dataLength+1].decode('utf8')

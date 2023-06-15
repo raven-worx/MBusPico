@@ -121,12 +121,38 @@ docker run -v ${PWD}:/opt/mbuspico mbuspico/build
 
 ### Native application
 
-Hold the BOOTSEL button on the Pico W while connecting it to the PC via a USB cable. Since v1.2 its also possible to call `http://<ip-address>/update` to restart into the bootloader (if built with HTTP option).
+Hold the BOOTSEL button on the Raspberry Pico W while connecting it to the PC via a USB cable. Since v1.2 its also possible to call `http://<ip-address>/update` to restart into the bootloader (if built with HTTP option).
 The Pico will show up as a flash drive. Copy the `mbuspico.uf2` file from the build directory to the appeared flash drive. The Pico W will automatically reboot into the just flashed firmware after copying has finished. Done.
 
 ### MicroPython application
 
-[TODO]
+To copy MicroPython to the Raspberry Pico, hold the BOOTSEL button on the Raspberry Pico W while connecting it to the PC via a USB cable
+and copy the `micropython.uf2` to the appeared flash drive.
+
+> **Important:** MBusPico requires MicroPython with built-in support for AES-CTR ciphre, which is disabled by default in the official release builds.
+> A prebuilt MicroPython version can be found in the python archive of each [MBusPico release](https://github.com/raven-worx/mbuspico/releases) (since v2.0 onwards), or in the `python` directory of this respository.
+
+Now make sure you have adapted `config.py` to your needs before you copy all folders and files from `python/dist` to the Raspberry Pico:
+
+For example you can use [Thonny IDE](https://thonny.org/) to transfer files to the Raspberry Pico.
+
+Or via command line using python3/pip3 with the following commands.
+On Windows make sure `python3.exe` can be found in the `PATH`. Probably the easiest is to install Python3 from the [Windows Marketplace](https://apps.microsoft.com/store/detail/python-311/9NRWMJP3717K).
+
+Install ampy CLI tool:
+```console
+pip3 install adafruit-ampy
+```
+
+Use ampy to copy files and folders to device. `<PORT>` must the serial port of the connected Raspberry Pico running MicroPython. e.g. Linux: `/dev/ttyS0`, Windows `COM5`
+To see a list of available serial ports you can run `python3 -m serial.tools.list_ports`
+```console
+cd python/dist
+ampy --port <PORT> put mbus
+ampy --port <PORT> put provider
+ampy --port <PORT> put config.py
+ampy --port <PORT> put main.py
+```
 
 # HTTP endpoints
 

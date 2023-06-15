@@ -1,5 +1,6 @@
-from mbus import meterdata, serial
-from mbus.devices import *
+#from mbus import meterdata, serial
+from mbus import serial
+from mbus.devices import kaifa_ma309m_netznoe
 from provider import www, udp
 import config
 import sys
@@ -11,15 +12,14 @@ else:
 	import asyncio
 
 async def connect_wifi(wlan,ssid,password):
-	if sys.implementation.name != "micropython":
-		return
 	if wlan.isconnected():
 		return
+	print("connecting to WIFI: '", ssid, "'")
 	wlan.connect(ssid, password)
 	while wlan.isconnected() == False:
 		print('Waiting for wifi connection...')
 		await asyncio.sleep(1.5) # [s]
-	print("WIFI:", wlan.ifconfig())
+	print("WIFI connected:", wlan.ifconfig())
 
 
 async def handler_task():
@@ -34,6 +34,8 @@ async def handler_task():
 		wlan = network.WLAN(network.STA_IF)
 		wlan.config(hostname=wifi_hostname)
 		wlan.active(True)
+		if wlan.isconnected():
+			print("WIFI connected:", wlan.ifconfig())
 	
 	while True:
 		if config.MBUSPICO_WIFI_ENABLED and sys.implementation.name == "micropython":
