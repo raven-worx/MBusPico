@@ -2,6 +2,7 @@
 
 # text files 
 *.sh text eol=lf
+*.py text eol=lf
 
 # binary files
 *.jpg binary

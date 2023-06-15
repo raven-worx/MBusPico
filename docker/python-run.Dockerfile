@@ -14,7 +14,7 @@ RUN set -ex \
     && apt clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-COPY python/ /opt/mbuspico/
+COPY python/dist /opt/mbuspico/
 
 WORKDIR /opt/mbuspico
-ENTRYPOINT ["python3 /opt/mbuspico/main.py"]
+ENTRYPOINT ["/opt/mbuspico/main.py"]

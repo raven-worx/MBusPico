@@ -1,4 +1,5 @@
-#from mbus import meterdata, serial
+#!/usr/bin/env python3
+
 from mbus import serial
 from mbus.devices import kaifa_ma309m_netznoe
 from provider import www, udp
