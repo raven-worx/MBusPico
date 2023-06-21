@@ -1,6 +1,7 @@
 # Loxone integration
 
-To integrate MBusPico into Loxone and start optimizing your energy management you can use the [HTTP VirtualIn](VI_MBusPico.xml) or [UDP VirtualIn](VI_MBusPico.xml) template.
+To integrate MBusPico into Loxone and start optimizing your energy management you can import the [HTTP VirtualIn](VI_MBusPico.xml) 
+or [UDP VirtualIn](VIU_MBusPico.xml) template into Loxone Config.
 
 [<img src="config.png?raw=true" width="600"/>](config.png?raw=true)
 

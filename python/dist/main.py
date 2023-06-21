@@ -28,7 +28,6 @@ async def handler_task():
 
 	await serial.uart_init()
 	
-	
 	if config.MBUSPICO_WIFI_ENABLED and sys.implementation.name == "micropython":
 		wifi_hostname = config.MBUSPICO_WIFI_HOSTNAME if config.MBUSPICO_WIFI_HOSTNAME else "MBusPico"
 		network.hostname(wifi_hostname)
@@ -43,7 +42,7 @@ async def handler_task():
 			await connect_wifi(wlan, config.MBUSPICO_WIFI_SSID, config.MBUSPICO_WIFI_PWD)
 		
 		# read serial data
-		#data = await serial.uart_read()
+		data = await serial.uart_read()
 		if len(data) > 0:
 			# parse meter data
 			meter = dev.parse_data(data)
@@ -53,9 +52,7 @@ async def handler_task():
 				www.METERDATA = meter
 			else:
 				print("parsing meter data failed")
-			data = bytes()
-		else:
-			await asyncio.sleep(1) # [s]
+		await asyncio.sleep(2) # [s]
 
 async def main():
 	tasks = []

@@ -17,4 +17,4 @@ RUN set -ex \
 COPY python/dist /opt/mbuspico/
 
 WORKDIR /opt/mbuspico
-ENTRYPOINT ["/opt/mbuspico/main.py"]
+ENTRYPOINT ["python3", "/opt/mbuspico/main.py"]

@@ -89,14 +89,17 @@ If you do not have a checkout of the pico-sdk yet, you can instead add the optio
 
 For Windows i recommend using [Docker](https://docs.docker.com/get-docker/) for a quick and painless build.
 
-Create a (local) docker image with the file provided in the `docker` folder of this repository:
+You can also use the already available prebuilt docker image `ravenworx/pico-sdk-build:1.5.0` which contains already all required packages to build MBusPico.
+
 ```console
-docker build -t mbuspico/build -f docker/Dockerfile
+docker run -v ${PWD}:/opt/mbuspico --entrypoint=/opt/mbuspico/build.sh ravenworx/mbus-pico-build:1.5.0
 ```
-After the build of the docker image has finished (might take a few minutes) simply start the built docker image which implicitly starts building the application:
+
+Alternatively you can create a (local) docker image with the file provided in the `docker` folder of this repository.
 ```console
-docker run -v ${PWD}:/opt/mbuspico mbuspico/build
+docker build -t my/mbuspico-build -f docker/Dockerfile
 ```
+After the build of the docker image has finished (might take a few minutes) simply start the built with the `my/mbuspico-build` instead.
 
 ### Build options
 
@@ -190,7 +193,7 @@ Power supply (24V):
 
 # Loxone integration
 
-Read [loxone/README.md](loxone/README.md)
+See [loxone/README.md](loxone/README.md)
 
 # 3D printer files
 

@@ -11,13 +11,20 @@ else:
 #  USER CONFIGURATION
 #################################
 
-# The device key is required for decryption of the read meter data
+# The device key is required for decryption of the MBus meter data
 # You must request this key for your Smart Meter from your power provider
 # The key must be exactly 32 characters long (hex format -> only alphanumeric characters [a-f0-9])
 #  e.g. '1A2B3CFF1234DE567890F1234DE5EE85'
 MBUSPICO_DEVICE_KEY = OPTION("MBUSPICO_DEVICE_KEY", "")
+
+# ------ SERIAL PORT -------
+#  NOTE: only used when running on Raspberry Pi / CPython
+
+# the serial port to read MBus data from
+MBUSPICO_SERIAL_PORT = OPTION("MBUSPICO_SERIAL_PORT", "/dev/ttyS0")
+
 # ---------- WIFI ----------
-#  NOTE: only used when running on RaspberryPi Pico (MicroPython)
+#  NOTE: only used when running on RaspberryPi Pico / MicroPython
 
 # when 'True' the device should connect to a Wifi network, 'False' to disable
 MBUSPICO_WIFI_ENABLED = True

@@ -123,7 +123,7 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 	
 	def parse_data(self,data):
 		if len(data) < 256:
-			print("Received packet with invalid size:", data.length, "< 256")
+			print("Received packet with invalid size:", len(data), "< 256")
 			return False
 		
 		# Decrypting
@@ -229,7 +229,7 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 				elif obisCode[_OBIS_C:_OBIS_D+1] == _ESPDM_REACTIVE_ENERGY_MINUS:
 					codeType = _CodeType_ReactiveEnergyMinus
 				else:
-					print("Unsupported OBIS code OBIS_C:", obisCode[OBIS_C], "OBIS_D:", obisCode[OBIS_D])
+					print("Unsupported OBIS code OBIS_C:", obisCode[_OBIS_C], "OBIS_D:", obisCode[_OBIS_D])
 			elif obisCode[_OBIS_A] == _Medium_Abstract:
 				if obisCode[_OBIS_C:_OBIS_D+1] == _ESPDM_TIMESTAMP:
 					codeType = _CodeType_Timestamp;
