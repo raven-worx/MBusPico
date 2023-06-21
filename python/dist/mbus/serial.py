@@ -31,6 +31,13 @@ if sys.implementation.name == "micropython":
 		while _SERIAL.any() > 0:
 			d += _SERIAL.read(1)
 		return d
+	
+	def _get_time():
+		return time.ticks_ms()
+	
+	def _time_diff(t1,t2):
+		return time.ticks_diff(t1,t2)
+
 # PYTHON
 else:
 	import serial
@@ -41,6 +48,7 @@ else:
 	# UART
 	#
 	def _uart_init():
+		global _SERIAL
 		_SERIAL = serial.Serial(
 			port=os.getenv(config.MBUSPICO_SERIAL_PORT),
 			baudrate=2400,
@@ -51,7 +59,14 @@ else:
 		)
 	
 	def _uart_read():
+		global _SERIAL
 		return _SERIAL.read()
+	
+	def _get_time():
+		return round(time.time() * 1000)
+	
+	def _time_diff(t1,t2):
+		return t1-t2
 
 
 async def uart_init():
@@ -59,13 +74,14 @@ async def uart_init():
 	print("initialized UART")
 
 async def uart_read():
-	lastRead = time.ticks_ms()
+	lastRead = _get_time()
 	data = bytes()
-	while (time.ticks_ms() - lastRead) < 2000:
+	while _time_diff(_get_time(),lastRead) < 1500:
 		chunk = _uart_read()
 		if len(chunk) > 0:
-			lastRead = time.ticks_ms()
+			lastRead = _get_time()
 			data += chunk
 		asyncio.sleep_ms(100)
+	print("uart_read():", len(data))
 	return data
 
