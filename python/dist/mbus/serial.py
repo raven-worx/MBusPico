@@ -50,7 +50,7 @@ else:
 	def _uart_init():
 		global _SERIAL
 		_SERIAL = serial.Serial(
-			port=os.getenv(config.MBUSPICO_SERIAL_PORT),
+			port=config.MBUSPICO_SERIAL_PORT,
 			baudrate=2400,
 			parity=serial.PARITY_EVEN,
 			stopbits=serial.STOPBITS_ONE,
@@ -81,7 +81,7 @@ async def uart_read():
 		if len(chunk) > 0:
 			lastRead = _get_time()
 			data += chunk
-		asyncio.sleep_ms(100)
+		await asyncio.sleep(0.1) # [s]
 	print("uart_read():", len(data))
 	return data
 
