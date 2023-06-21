@@ -44,23 +44,17 @@ else:
 	import os
 	from datetime import datetime
 	
-	#
-	# UART
-	#
 	def _uart_init():
 		global _SERIAL
-		_SERIAL = serial.Serial(
-			port=config.MBUSPICO_SERIAL_PORT,
-			baudrate=2400,
-			parity=serial.PARITY_EVEN,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			timeout=0
-		)
+		_SERIAL = serial.Serial(config.MBUSPICO_SERIAL_PORT,9600)
 	
 	def _uart_read():
 		global _SERIAL
-		return _SERIAL.read()
+		data = bytes()
+		avail = _SERIAL.inWaiting()
+		if avail > 0:
+			data += _SERIAL.read(avail)
+		return data
 	
 	def _get_time():
 		return round(time.time() * 1000)
@@ -81,7 +75,5 @@ async def uart_read():
 		if len(chunk) > 0:
 			lastRead = _get_time()
 			data += chunk
-		await asyncio.sleep(0.1) # [s]
-	print("uart_read():", len(data))
+		await asyncio.sleep(0.1)
 	return data
-
