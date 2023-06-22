@@ -46,7 +46,7 @@ else:
 	
 	def _uart_init():
 		global _SERIAL
-		_SERIAL = serial.Serial(config.MBUSPICO_SERIAL_PORT,9600)
+		_SERIAL = serial.Serial(config.MBUSPICO_SERIAL_PORT,2400)
 	
 	def _uart_read():
 		global _SERIAL
@@ -70,7 +70,7 @@ async def uart_init():
 async def uart_read():
 	lastRead = _get_time()
 	data = bytes()
-	while _time_diff(_get_time(),lastRead) < 1500:
+	while _time_diff(_get_time(),lastRead) < 1000:
 		chunk = _uart_read()
 		if len(chunk) > 0:
 			lastRead = _get_time()

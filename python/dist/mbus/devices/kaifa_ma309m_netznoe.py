@@ -7,7 +7,7 @@ import sys
 if sys.implementation.name == "micropython":
 	from mbus._mp_datetime import datetime
 else:
-	import datetime
+	from datetime import datetime
 
 _DLMS_HEADER1_START = 0 # Start of first DLMS header
 _DLMS_HEADER1_LENGTH = 26
