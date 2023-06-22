@@ -166,8 +166,8 @@ When built with `MBUSPICO_HTTP_ENABLED` option enabled the following HTTP endpoi
 | **Method**    | **Endpoint URL**      | **Description**    |
 | --------------| --------------------- | ------------------ |
 | GET           | /                     | Return last read meter data in JSON format |
-| GET           | /update               | Reboot device into USB bootloader for a quick and easy update of MBusPico application |
-| GET           | /reboot               | Reboot device      |
+| GET           | /update               | Reboot device into USB bootloader for a quick and easy update of MBusPico application (*only available on Raspberry Pico*) |
+| GET           | /reboot               | Reboot device (*only available on Raspberry Pico*) |
 
 # Hardware wiring / assembly
 

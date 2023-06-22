@@ -164,14 +164,14 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 		currentPosition = _DECODER_START_OFFSET # Offset for start of OBIS decoding, skip header, timestamp and break block
 		
 		while True:
-			print("currentPosition:", currentPosition)
-			print("OBIS header type:", plaintext[currentPosition + _OBIS_TYPE_OFFSET])
+			#print("currentPosition:", currentPosition)
+			#print("OBIS header type:", plaintext[currentPosition + _OBIS_TYPE_OFFSET])
 			if plaintext[currentPosition + _OBIS_TYPE_OFFSET] != _DataType_OctetString:
 				print("Unsupported OBIS header type")
 				return False
 			
 			obisCodeLength = plaintext[currentPosition + _OBIS_LENGTH_OFFSET]
-			print("OBIS code/header length:", obisCodeLength)
+			#print("OBIS code/header length:", obisCodeLength)
 			
 			if obisCodeLength != 0x06 and obisCodeLength != 0x0C:
 				print("Unsupported OBIS header length")
@@ -197,8 +197,8 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 			
 			codeType = _CodeType_Unknown
 			
-			print("obisCode (OBIS_A):", obisCode[_OBIS_A])
-			print("currentPosition:", currentPosition)
+			#print("obisCode (OBIS_A):", obisCode[_OBIS_A])
+			#print("currentPosition:", currentPosition)
 			
 			if obisCode[_OBIS_A] == _Medium_Electricity:
 				# Compare C and D against code
@@ -291,8 +291,8 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 				elif codeType == _CodeType_PowerFactor:
 					meter.powerFactor = dataValue
 			elif dataType == _DataType_OctetString:
-				print("Arrived on OctetString")
-				print("currentPosition:", currentPosition, "plaintext:", plaintext[currentPosition])
+				#print("Arrived on OctetString")
+				#print("currentPosition:", currentPosition, "plaintext:", plaintext[currentPosition])
 				
 				dataLength = plaintext[currentPosition]
 				currentPosition += 1 # Advance past string length
