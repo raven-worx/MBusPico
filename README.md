@@ -217,7 +217,7 @@ Power supply (24V):
 | -                | -                       |                         | VIN-                   | DC-/GND              | Ground |
 
 
-[<img src="/3d/wiring_pi.jpg?raw=true" width="300"/>](/3d/wiring_pi.jpg?raw=true)
+[<img src="/3d/wiring_pi.jpg?raw=true" width="400"/>](/3d/wiring_pi.jpg?raw=true)
 
 # Loxone integration
 

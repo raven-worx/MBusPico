@@ -1,6 +1,6 @@
 # Loxone integration
 
-To integrate MBusPico into Loxone and start optimizing your energy management you can import the [HTTP VirtualIn](VI_MBusPico.xml) 
+To integrate MBusPico into Loxone and start optimizing your energy management you can download & import the [HTTP VirtualIn](VI_MBusPico.xml) 
 or [UDP VirtualIn](VIU_MBusPico.xml) template into Loxone Config.
 
 [<img src="config.png?raw=true" width="600"/>](config.png?raw=true)
@@ -23,7 +23,7 @@ Afterwards reboot the device.
 
 On a Loxberry this can be done directly in the web UI. From `System settings` select `Loxberry services` and `More options`:
 
-[<img src="loxberry_enable_serialport.png?raw=true" width="300"/>](loxberry_enable_serialport.png?raw=true)
+[<img src="loxberry_enable_serialport.png?raw=true" width="600"/>](loxberry_enable_serialport.png?raw=true)
 
 Again reboot the device after saving the settings.
 
