@@ -555,7 +555,7 @@ static void loop() {
 }
 
 const char* mbuspico_device_name() {
-	return "Kaifa MA309M (EVN)";
+	return "Kaifa MA309M (NetzNÖ)";
 }
 
 static int mbuspico_device_init() {
