@@ -3,6 +3,8 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/raven-worx/mbuspico?logo=github&sort=semver)](https://github.com/raven-worx/mbuspico/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](/LICENSE)
 
+> **NEW IN VERSION 2.0: ADDED MICROPYTHON AND PYTHON SUPPORT. RASPBERRY PI IS NOW SUPPORTED. ADDED READY-TO-USE DOCKER IMAGE**
+
 This project was created mostly out of interest and the wish to read out and display my power meter data in my Loxone smart home setup. (Thus the option with the 24V power supply - see below)
 
 Currently the only smart meter device supported is the **Kaifa MA309M** (Austrian power provider Netz NÖ), but could be extended to any other model. Credits for the data intepretation code goes out to **[firegore/esphome-dlms-meter](https://github.com/firegore/esphome-dlms-meter)**!
@@ -116,7 +118,7 @@ After the build of the docker image has finished (might take a few minutes) simp
 | MBUSPICO_UDP_RECEIVER_PORT |          | yes, if MBUSPICO_UDP_ENABLED | the UDP receiver port the meter data packet should be send to |
 | MBUSPICO_UDP_INTERVAL_S | 30          | no                      | the maximum interval [sec] the meter data should be send out via UDP |
 | MBUSPICO_HTTP_ENABLED | ON            | no                      | specifies if the device should launch a simple HTTP server to provide the read meter data |
-| MBUSPICO_HTTP_SERVER_PORT  | 80       | no                      | specifies the listening port for the HTTP webserver |
+| MBUSPICO_HTTP_SERVER_PORT | 80        | no                      | specifies the listening port for the HTTP webserver |
 | MBUSPICO_HTTP_AUTH_USER |             | no                      | Protect access to data with authentication
 | MBUSPICO_HTTP_AUTH_PWD |              | no                      | Protect access to data with authentication
 
@@ -169,7 +171,7 @@ When built with `MBUSPICO_HTTP_ENABLED` option enabled the following HTTP endpoi
 
 # Hardware wiring / assembly
 
-See the tables below how to wire the Raspberry Pico W with the used hardware components and power supply.
+## Raspberry Pico W
 
 | **Pico W**      | **M-Bus Slave CLICK**   | **RJ11** |  **Notes** |
 | --------------- | ----------------------- | -------- |  --------- |
@@ -189,7 +191,33 @@ Power supply (24V):
 | -               | -                       | VIN                     | DC+/24V              | 24V external power supply |
 | -               | -                       | GND                     | DC-/GND              | Ground |
 
-[<img src="/3d/image.jpg?raw=true" width="600"/>](/3d/image.jpg?raw=true)
+[<img src="/3d/wiring_pico.jpg?raw=true" width="600"/>](/3d/wiring_pico.jpg?raw=true)
+
+## Raspberry Pi
+
+| **Raspberry Pi** | **M-Bus Slave CLICK**   | **RJ11** |  **Notes** |
+| ---------------- | ----------------------- | -------- |  --------- |
+| GPIO14 (PIN 8)   | RX                      | -        | UART RX of MBUS module <--> UART TX of Raspberry Pi |
+| GPIO15 (PIN 10)  | TX                      | -        | UART TX of MBUS module <--> UART RX of Raspberry Pi |
+| -                | MBUS1                   | 3        | MBUS module to RJ11 cable line 3 or 4 (polarity doesn't matter) |
+| -                | MBUS2                   | 4        | MBUS module to RJ11 cable line 3 or 4 (polarity doesn't matter) |
+
+Power supply (24V):
+
+| **Raspberry Pi** | **M-Bus Slave CLICK**   | **24V -> 5V module**    | **24V -> 3.3V module** | **24V power source** |  **Notes** |
+| ---------------- | ----------------------- | ----------------------- | ---------------------- | -------------------- | ---------- |
+| 5V               | -                       | VOUT+                   |                        |                      | 5V power supply for Raspberry Pi |
+| 5V               | -                       | VOUT+                   |                        |                      | 5V power supply for Raspberry Pi |
+| GND              | -                       | VOUT-                   |                        |                      | Ground |
+| -                | -                       | VIN+                    |                        | DC+/24V              | 24V external power supply |
+| -                | -                       | VIN-                    |                        | DC-/GND              | Ground |
+| -                | 3V3                     |                         | VOUT+                  |                      | 3.3V power supply for MBus CLICK module |
+| -                | GND                     |                         | VOUT-                  |                      | Ground |
+| -                | -                       |                         | VIN+                   | DC+/24V              | 24V external power supply |
+| -                | -                       |                         | VIN-                   | DC-/GND              | Ground |
+
+
+[<img src="/3d/wiring_pi.jpg?raw=true" width="300"/>](/3d/wiring_pi.jpg?raw=true)
 
 # Loxone integration
 
