@@ -131,7 +131,7 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 		payloadLength = 243
 		
 		if len(data) <= payloadLength:
-			print("data len:", data.length, ", payloadLength:", payloadLength)
+			print("data len:", len(data), ", payloadLength:", payloadLength)
 			print("Payload length is too big for received data")
 			return False
 		
@@ -139,7 +139,7 @@ class Kaifa_MA309M_NetzNoe(_mbusdevice._MBusDevice):
 		payloadLength2 = payloadLength - payloadLength1
 		
 		if payloadLength2 >= (len(data) - _DLMS_HEADER2_START - _DLMS_HEADER2_LENGTH):
-			print("data len:", data.length, ", payloadLength2:", payloadLength2)
+			print("data len:", len(data), ", payloadLength2:", payloadLength2)
 			print("Payload length 2 is too big")
 			return False
 		
