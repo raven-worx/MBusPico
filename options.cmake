@@ -13,7 +13,7 @@ cmake_dependent_option(MBUSPICO_WIFI_HOSTNAME "Network hostname" "MBusPico" "MBU
 cmake_dependent_option(MBUSPICO_UDP_ENABLED "Enable UDP sender" ON "MBUSPICO_WIFI_ENABLED" OFF)
 cmake_dependent_option(MBUSPICO_UDP_RECEIVER_HOST "UDP receiver host" "" "MBUSPICO_WIFI_ENABLED;MBUSPICO_UDP_ENABLED" "")
 cmake_dependent_option(MBUSPICO_UDP_RECEIVER_PORT "UDP receiver port" 0 "MBUSPICO_WIFI_ENABLED;MBUSPICO_UDP_ENABLED" 0)
-cmake_dependent_option(MBUSPICO_UDP_INTERVAL_S "UDP send interval [s]" 30 "MBUSPICO_WIFI_ENABLED;MBUSPICO_UDP_ENABLED" 30)
+cmake_dependent_option(MBUSPICO_UDP_INTERVAL_S "UDP send interval [s]" 10 "MBUSPICO_WIFI_ENABLED;MBUSPICO_UDP_ENABLED" 10)
 
 # HTTP SERVER
 cmake_dependent_option(MBUSPICO_HTTP_ENABLED "Enable HTTP server" ON "MBUSPICO_WIFI_ENABLED" OFF)

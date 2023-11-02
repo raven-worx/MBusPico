@@ -126,25 +126,25 @@ static unsigned long lastRead = 0; // Timestamp when data was last read
 static byte key[16];
 static size_t keyLength = 0;
 
-static void abort() {
+static void _abort() {
 	receiveBufferIndex = 0;
 }
 
-static uint16_t swap_uint16(uint16_t val) {
+static uint16_t _swap_uint16(uint16_t val) {
 	return (val << 8) | (val >> 8);
 }
 
-static uint32_t swap_uint32(uint32_t val) {
+static uint32_t _swap_uint32(uint32_t val) {
 	val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
 	return (val << 16) | (val >> 16);
 }
 
-static void set_key(byte k[], size_t keyLength) {
+static void _set_key(byte k[], size_t keyLength) {
 	memcpy(&key[0], &k[0], keyLength);
 	keyLength = keyLength;
 }
 
-static void log_packet(byte array[], size_t length) {
+static void _log_packet(byte array[], size_t length) {
 	char buffer[(length*3)];
 
 	for (unsigned int i = 0; i < length; i++) {
@@ -160,7 +160,7 @@ static void log_packet(byte array[], size_t length) {
 	MBUSPICO_LOG_D(LOG_TAG_DEVICE, buffer);
 }
 
-static time_t timestamp_to_lx(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) {
+static time_t _timestamp_to_lx(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) {
 	static time_t lxTime = 0;
 	if (lxTime <= 0) {
 		struct tm t;
@@ -203,15 +203,15 @@ static time_t timestamp_to_lx(uint16_t year, uint8_t month, uint8_t day, uint8_t
 	return timestamp - lxTime;
 }
 
-static int available(xMBusData_t* data) {
+static int _available(xMBusData_t* data) {
 	return xQueueReceive(g_DeviceEventQueue, data, 0) == pdPASS ? 1 : 0;
 }
 
-static void loop() {
+static void _loop() {
 	uint64_t currentTime = mbuspico_time_ms();
 
 	xMBusData_t d;
-	while(available(&d)) { // read while data is available
+	while(_available(&d)) { // read while data is available
 		if(receiveBufferIndex >= READ_BUFFER_SIZE) {
 			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Buffer overflow");
 			receiveBufferIndex = 0;
@@ -227,11 +227,11 @@ static void loop() {
 		MBUSPICO_LOG_D(LOG_TAG_DEVICE, "receiveBufferIndex: %d", receiveBufferIndex);
 		if(receiveBufferIndex < 256) {
 			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Received packet with invalid size");
-			return abort();
+			return _abort();
 		}
 
 		MBUSPICO_LOG_D(LOG_TAG_DEVICE, "Handling packet", "");
-		log_packet(receiveBuffer, receiveBufferIndex);
+		_log_packet(receiveBuffer, receiveBufferIndex);
 
 		// Decrypting
 
@@ -244,7 +244,7 @@ static void loop() {
 		if(receiveBufferIndex <= payloadLength) {
 			MBUSPICO_LOG_D(LOG_TAG_DEVICE, "receiveBufferIndex: %d, payloadLength: %d", receiveBufferIndex, payloadLength);
 			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Payload length is too big for received data");
-			return abort();
+			return _abort();
 		}
 
 		/*
@@ -253,7 +253,7 @@ static void loop() {
 		payloadLengthPacket1 = swap_uint16(payloadLengthPacket1);
 		if(payloadLengthPacket1 >= payloadLength) {
 			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Payload length 1 is too big");
-			return abort();
+			return _abort();
 		}
 		*/
 		uint16_t payloadLength1 = 228; // TODO: Read payload length 1 from data
@@ -262,7 +262,7 @@ static void loop() {
 		if(payloadLength2 >= receiveBufferIndex - DLMS_HEADER2_OFFSET - DLMS_HEADER2_LENGTH) {
 			MBUSPICO_LOG_D(LOG_TAG_DEVICE, "receiveBufferIndex: %d, payloadLength2: %d", receiveBufferIndex, payloadLength2);
 			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Payload length 2 is too big");
-			return abort();
+			return _abort();
 		}
 
 		byte iv[12]; // Reserve space for the IV, always 12 bytes
@@ -283,13 +283,13 @@ static void loop() {
 
 		if(plaintext[0] != 0x0F || plaintext[5] != 0x0C) {
 			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Packet was decrypted but data is invalid");
-			return abort();
+			return _abort();
 		}
 
 		// Decoding
 
 		MBUSPICO_LOG_D(LOG_TAG_DEVICE, "Plaintext Packet:");
-		log_packet(plaintext, 300);
+		_log_packet(plaintext, 300);
 		int currentPosition = DECODER_START_OFFSET;
 		
 		MeterData_t meterData;
@@ -301,7 +301,7 @@ static void loop() {
 			MBUSPICO_LOG_D(LOG_TAG_DEVICE, "OBIS header type: %d", plaintext[currentPosition + OBIS_TYPE_OFFSET]);
 			if(plaintext[currentPosition + OBIS_TYPE_OFFSET] != DataType_OctetString) {
 				MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Unsupported OBIS header type");
-				return abort();
+				return _abort();
 			}
 
 			byte obisCodeLength = plaintext[currentPosition + OBIS_LENGTH_OFFSET];
@@ -309,7 +309,7 @@ static void loop() {
 
 			if(obisCodeLength != 0x06 && obisCodeLength != 0x0C) {
 				MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Unsupported OBIS header length");
-				return abort();
+				return _abort();
 			}
 
 			byte obisCode[obisCodeLength];
@@ -409,7 +409,7 @@ static void loop() {
 			}
 			else {
 				MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Unsupported OBIS medium");
-				return abort();
+				return _abort();
 			}
 
 			uint8_t uint8Value;
@@ -422,7 +422,7 @@ static void loop() {
 					dataLength = 4;
 
 					memcpy(&uint32Value, &plaintext[currentPosition], 4); // Copy bytes to integer
-					uint32Value = swap_uint32(uint32Value); // Swap bytes
+					uint32Value = _swap_uint32(uint32Value); // Swap bytes
 
 					floatValue = uint32Value; // Ignore decimal digits for now
 					
@@ -452,7 +452,7 @@ static void loop() {
 					dataLength = 2;
 
 					memcpy(&uint16Value, &plaintext[currentPosition], 2); // Copy bytes to integer
-					uint16Value = swap_uint16(uint16Value); // Swap bytes
+					uint16Value = _swap_uint16(uint16Value); // Swap bytes
 
 					if(plaintext[currentPosition + 5] == Accuracy_SingleDigit) {
 						floatValue = uint16Value / 10.0; // Divide by 10 to get decimal places
@@ -506,7 +506,7 @@ static void loop() {
 						uint8_t second;
 
 						memcpy(&uint16Value, &plaintext[currentPosition], 2);
-						year = swap_uint16(uint16Value);
+						year = _swap_uint16(uint16Value);
 
 						memcpy(&month, &plaintext[currentPosition + 2], 1);
 						memcpy(&day, &plaintext[currentPosition + 3], 1);
@@ -517,7 +517,7 @@ static void loop() {
 
 						sprintf(meterData.timestamp, "%04u-%02u-%02uT%02u:%02u:%02uZ", year, month, day, hour, minute, second);
 
-						meterData.lxTimestamp = timestamp_to_lx(year, month, day, hour, minute, second);
+						meterData.lxTimestamp = _timestamp_to_lx(year, month, day, hour, minute, second);
 					}
 					else if(codeType == CodeType_MeterNumber) {
 						MBUSPICO_LOG_D(LOG_TAG_DEVICE, "Constructing MeterNumber...");
@@ -528,7 +528,7 @@ static void loop() {
 				break;
 				default:
 					MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Unsupported OBIS data type");
-					return abort();
+					return _abort();
 				break;
 			}
 
@@ -584,7 +584,7 @@ void mbuspico_device_task(void* arg) {
 	}
 	
 	for (;;) {
-		loop();
+		_loop();
 		vTaskDelay(pdMS_TO_TICKS(50));
 	}
 }
