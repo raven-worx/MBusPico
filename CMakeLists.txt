@@ -66,6 +66,7 @@ target_link_libraries(${TARGETNAME}
 	FreeRTOS-Kernel-Heap4 # FreeRTOS kernel and dynamic heap
 	mbedtls_crypto
 	mongoose
+	littlefs
 )
 
 # enable usb output, disable uart output

@@ -82,7 +82,11 @@ add_library(mbedtls_crypto STATIC)
 target_sources(mbedtls_crypto PRIVATE ${mbedtls_src_crypto})
 
 set_target_properties(mbedtls_crypto PROPERTIES COMPILE_FLAGS "-I${PROJECT_SOURCE_DIR}/include -DMBEDTLS_CONFIG_FILE=\"<mbedtls_config.h>\"")
-target_include_directories(mbedtls_crypto PUBLIC ${CMAKE_CURRENT_LIST_DIR}/mbedtls/include ${CMAKE_CURRENT_LIST_DIR}/mbedtls/library)
+target_include_directories(mbedtls_crypto
+PUBLIC
+	${CMAKE_CURRENT_LIST_DIR}/mbedtls/include
+	${CMAKE_CURRENT_LIST_DIR}/mbedtls/library
+)
 
 
 #
@@ -106,3 +110,22 @@ PRIVATE
 )
 
 
+#
+# littlefs
+#
+add_library(littlefs STATIC)
+target_sources(littlefs
+PRIVATE
+	${CMAKE_CURRENT_LIST_DIR}/littlefs/lfs.c
+	${CMAKE_CURRENT_LIST_DIR}/littlefs/lfs_util.c
+)
+
+target_compile_options(littlefs
+PUBLIC
+	"-DLFS_THREADSAFE=1"
+)
+
+target_include_directories(littlefs 
+PUBLIC
+	${CMAKE_CURRENT_LIST_DIR}/littlefs
+)

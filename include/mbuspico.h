@@ -35,15 +35,15 @@ typedef struct {
 	char meterNumber[13];		// 123456789012
 } MeterData_t;
 
-void mbuspico_print_meterdata(void);
+void mbuspico_print_meterdata();
 size_t mbuspico_get_meterdata_json(char* data_buffer, size_t buffer_size);
 void mbuspico_set_meterdata(MeterData_t* data);
 
 // global interface
-void mbuspico_init(void);
+void mbuspico_init();
 int mbuspico_schedule_reboot(uint32_t ms);
 int mbuspico_schedule_reboot_usb(uint32_t ms);
-uint64_t mbuspico_time_ms(void);
+uint64_t mbuspico_time_ms();
 void mbuspico_hex_to_bin(const char* in, size_t len, unsigned char* out);
 void mbuspico_reboot();
 void mbuspico_reboot_into_bootloader();
@@ -84,6 +84,30 @@ void mbuspico_udp_task(void*);
 #endif
 
 // ####################################
+// CONFIG
+// ####################################
+
+#define MBUSPICO_CONFIG_SIZE_STR	128
+#define MBUSPICO_CONFIG_SIZE_STR_XL	256
+
+typedef enum {
+	MBUSPICO_CONFIG_ENCRYPTION_KEY,
+	MBUSPICO_CONFIG_WIFI_SSID,
+	MBUSPICO_CONFIG_WIFI_PWD,
+	MBUSPICO_CONFIG_WIFI_HOSTNAME,
+	MBUSPICO_CONFIG_HTTP_PORT,
+	MBUSPICO_CONFIG_HTTP_AUTH_USER,
+	MBUSPICO_CONFIG_HTTP_AUTH_PWD,
+	MBUSPICO_CONFIG_UDP_ENABLED,
+	MBUSPICO_CONFIG_UDP_RECEIVER,
+	MBUSPICO_CONFIG_UDP_PORT,
+	MBUSPICO_CONFIG_UDP_INTERVAL
+} mbuspico_config_t;
+
+int mbuspico_read_config(mbuspico_config_t config, byte* data, uint32_t data_size);
+int mbuspico_write_config(mbuspico_config_t config, byte* data, uint32_t data_size);
+
+// ####################################
 // LOGGING
 // ####################################
 
@@ -95,6 +119,7 @@ void mbuspico_udp_task(void*);
 #define LOG_TAG_HTTP	(1<<4)
 #define LOG_TAG_UDP		(1<<5)
 #define LOG_TAG_MG		(1<<6)
+#define LOG_TAG_FS		(1<<7)
 
 #define LOG_TAG_ALL		(0xFFFF)
 
