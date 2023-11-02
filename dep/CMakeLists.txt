@@ -95,11 +95,13 @@ PUBLIC
 add_library(mongoose STATIC)
 target_sources(mongoose PRIVATE ${CMAKE_CURRENT_LIST_DIR}/mongoose/mongoose.c)
 
-set_target_properties(mongoose PROPERTIES COMPILE_FLAGS "-DMG_ARCH=MG_ARCH_FREERTOS_LWIP -DMG_ENABLE_LWIP=1")
+set_target_properties(mongoose PROPERTIES COMPILE_FLAGS "-DMG_ARCH=MG_ARCH_FREERTOS -DMG_ENABLE_LWIP=1")
 
 target_include_directories(mongoose 
 PUBLIC
 	${CMAKE_CURRENT_LIST_DIR}/mongoose
+PRIVATE
+	${PROJECT_SOURCE_DIR}/include
 )
 
 target_link_libraries(mongoose
