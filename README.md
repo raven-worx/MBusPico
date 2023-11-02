@@ -67,7 +67,8 @@ There is a native Raspberry Pico application written in C using the following co
 * [pico-sdk](https://github.com/raspberrypi/pico-sdk)
 * [FreeRTOS](https://github.com/FreeRTOS/FreeRTOS-Kernel)
 * [mbedtls](https://github.com/Mbed-TLS/mbedtls)
-* [mongoose](https://github.com/cesanta/mongoose)
+* [mongoose](https://mongoose.ws/)
+* [Bootstrap](https://getbootstrap.com/)
 
 And (since v2.0) there is also a Python/Micropython version available, using the following moduls:
 * [microdot](https://github.com/miguelgrinberg/microdot)
