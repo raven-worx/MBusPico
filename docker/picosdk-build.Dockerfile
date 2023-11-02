@@ -11,6 +11,6 @@ RUN apt update && apt install -y git cmake gcc-arm-none-eabi python3 g++ curl py
     && apt autoremove -y \
     && apt clean -y \
     && rm -rf /var/lib/apt/lists/* \
-    && git clone --branch "1.5.0" https://github.com/raspberrypi/pico-sdk /opt/pico-sdk \
+    && git clone --branch "1.5.1" https://github.com/raspberrypi/pico-sdk /opt/pico-sdk \
     && cd /opt/pico-sdk \
     && git submodule update --init --recursive

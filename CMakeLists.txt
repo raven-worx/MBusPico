@@ -42,6 +42,8 @@ add_executable(${TARGETNAME}
 	src/mbuspico.c
 	src/http.c
 	src/udp.c
+	src/net/dnsserver.c
+	src/net/dhcpserver.c
 	src/devices/kaifa_ma309m_EVN.c
 )
 

@@ -61,9 +61,24 @@ typedef struct {
 extern QueueHandle_t g_DeviceEventQueue;
 
 #if MBUSPICO_WIFI_ENABLED
+
+#include "lwip/ip_addr.h"
+
 // wifi interface
 int mbuspico_wifi_get_state();
+int mbuspico_wifi_get_mode();
 void mbuspico_wifi_task(void*);
+
+#define MBUSPICO_WIFI_MODE_NOMODE	-1
+#define MBUSPICO_WIFI_MODE_STA 		0
+#define MBUSPICO_WIFI_MODE_AP		1
+
+typedef struct {
+	int link_state;	// wifi link state
+	int mode;		// current wifi mode
+    ip_addr_t gw;	// DHCP & DNS gateway ip
+	ip4_addr_t mask; // DHCP net mask
+} mbuspico_wifi_state_t;
 #endif
 
 // device interface
