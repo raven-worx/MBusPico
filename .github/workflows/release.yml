@@ -101,7 +101,7 @@ jobs:
         with:
           image: ravenworx/pico-sdk-build:latest
           options: |
-            -v ${pwd}:/opt/mbuspico
+            -v ${{ github.workspace }}:/opt/mbuspico
           run: |
             /opt/mbuspico/build.sh
       
