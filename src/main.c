@@ -9,6 +9,7 @@
 TimerHandle_t hWDTimer = NULL;
 // task handles
 TaskHandle_t hDbgTask = NULL;
+TaskHandle_t hFsTask = NULL;
 TaskHandle_t hWifiTask = NULL;
 TaskHandle_t hDeviceTask = NULL;
 TaskHandle_t hUartTask = NULL;
@@ -50,6 +51,7 @@ void printTaskInfo(TaskHandle_t hTask) {
 void mbuspico_dbg_task(void* arg) {
 	for (;;) {
 		printTaskInfo(hWifiTask);
+		printTaskInfo(hFsTask);
 		printTaskInfo(hDeviceTask);
 		printTaskInfo(hUartTask);
 		printTaskInfo(hHttpTask);
@@ -83,9 +85,16 @@ int main() {
 	#endif
 	}
 #endif
+
+	result = xTaskCreate(mbuspico_fs_task, "FS_Task", configMINIMAL_STACK_SIZE*6, NULL, tskIDLE_PRIORITY+1, &hFsTask);
+	if (result != pdPASS) {
+	#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
+		printf("Failed to create FS task!\n");
+	#endif
+	}
 	
 #if MBUSPICO_WIFI_ENABLED
-	result = xTaskCreate(mbuspico_wifi_task, "WIFI_Task", configMINIMAL_STACK_SIZE*6, NULL, tskIDLE_PRIORITY+1, &hWifiTask);
+	result = xTaskCreate(mbuspico_wifi_task, "WIFI_Task", configMINIMAL_STACK_SIZE*10, NULL, tskIDLE_PRIORITY+1, &hWifiTask);
 	if (result != pdPASS) {
 	#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
 		printf("Failed to create WIFI task!\n");
@@ -116,7 +125,7 @@ int main() {
 	}
 
 #if MBUSPICO_HTTP_ENABLED
-	result = xTaskCreate(mbuspico_http_task, "HTTP_Task", configMINIMAL_STACK_SIZE*8, NULL, tskIDLE_PRIORITY+1, &hHttpTask);
+	result = xTaskCreate(mbuspico_http_task, "HTTP_Task", configMINIMAL_STACK_SIZE*12, NULL, tskIDLE_PRIORITY+1, &hHttpTask);
 	if (result != pdPASS) {
 	#if MBUSPICO_LOG_LEVEL >= LOG_ERROR
 		printf("Failed to create HTTP task!\n");

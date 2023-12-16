@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 include(CMakeDependentOption)
 
+set(PICO_SDK_MIN_VERSION "1.5.1")
+
 # initialize pico-sdk from GIT
 # (note this can come from environment, CMake cache etc)
 #set(PICO_SDK_FETCH_FROM_GIT OFF)
@@ -22,6 +24,10 @@ project(MBusPico VERSION 1.4)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+if(${PICO_SDK_VERSION_STRING} VERSION_LESS ${PICO_SDK_MIN_VERSION})
+	message(FATAL_ERROR "INCOMPATIBLE VERSION OF PICO SDK: ${PICO_SDK_VERSION_STRING} - minimum required: ${PICO_SDK_MIN_VERSION}")
+endif()
+
 if (NOT PICO_CYW43_SUPPORTED OR NOT TARGET pico_cyw43_arch) # set by PICO_BOARD=pico_w
 	message(FATAL_ERROR "CYW43 driver not available")
 endif()
@@ -42,6 +48,7 @@ add_executable(${TARGETNAME}
 	src/mbuspico.c
 	src/http.c
 	src/udp.c
+	src/fs.c
 	src/net/dnsserver.c
 	src/net/dhcpserver.c
 	src/devices/kaifa_ma309m_EVN.c
@@ -65,6 +72,8 @@ PRIVATE
 target_link_libraries(${TARGETNAME}
 	pico_cyw43_arch_lwip_sys_freertos
 	pico_stdlib
+	pico_flash
+	mbuspico_web_res
 	FreeRTOS-Kernel-Heap4 # FreeRTOS kernel and dynamic heap
 	mbedtls_crypto
 	mongoose
@@ -72,8 +81,8 @@ target_link_libraries(${TARGETNAME}
 )
 
 # enable usb output, disable uart output
-pico_enable_stdio_usb(${TARGETNAME} 1)
-pico_enable_stdio_uart(${TARGETNAME} 0)
+pico_enable_stdio_usb(${TARGETNAME} 0)
+pico_enable_stdio_uart(${TARGETNAME} 1)
 
-# create map/bin/hex/uf2 file etc.
+# create map/bin/hex/uf2 files etc.
 pico_add_extra_outputs(${TARGETNAME})

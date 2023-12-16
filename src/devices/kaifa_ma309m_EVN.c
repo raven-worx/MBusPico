@@ -204,7 +204,7 @@ static time_t _timestamp_to_lx(uint16_t year, uint8_t month, uint8_t day, uint8_
 }
 
 static int _available(xMBusData_t* data) {
-	return xQueueReceive(g_DeviceEventQueue, data, 0) == pdPASS ? 1 : 0;
+	return xQueueReceive(g_DeviceDataQueue, data, 0) == pdPASS ? 1 : 0;
 }
 
 static void _loop() {
@@ -558,28 +558,23 @@ const char* mbuspico_device_name() {
 	return "Kaifa MA309M (NetzNÖ)";
 }
 
-static int mbuspico_device_init() {
-#ifdef MBUSPICO_DEVICE_KEY
-	keyLength = strlen(MBUSPICO_DEVICE_KEY);
-	if (keyLength == 32) { // hex string of 16 bytes (=32 characters)
-		mbuspico_hex_to_bin(MBUSPICO_DEVICE_KEY, keyLength, key);
-		keyLength /= 2;
-		return 0;
-	}
-	else {
-		MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Device encryption key must be exactly 32 hex-characters, got %d", keyLength);
-	}
-#else
-	#error "MBUSPICO_DEVICE_KEY not defined. Not specified via options?"
-#endif
-	return 1;
-}
-
 void mbuspico_device_task(void* arg) {
 	MBUSPICO_LOG_D(LOG_TAG_DEVICE, "mbuspico_device_task()");
 
-	if (mbuspico_device_init()) {
-		vTaskDelete(NULL);
+	char device_key[MBUSPICO_CONFIG_SIZE_STR] = {0};
+	mbuspico_read_config(MBUSPICO_CONFIG_ENCRYPTION_KEY, device_key, sizeof(device_key));
+
+	keyLength = strlen(device_key);
+	if (keyLength == 32) { // hex string of 16 bytes (=32 characters)
+		mbuspico_hex_to_bin(device_key, keyLength, key);
+		keyLength /= 2;
+	}
+	else {
+		MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Device encryption key must be exactly 32 hex-characters, got %d ('%s')", keyLength, device_key);
+	}
+
+	if (keyLength != 32) {
+		vTaskDelete(NULL); // bail out, stop task
 		return;
 	}
 	

@@ -12,6 +12,8 @@
 #include <semphr.h>
 #include <queue.h>
 
+#define MAX_LOG_MSG_SIZE 	(128)
+
 // ####################################
 // INTERFACES
 // ####################################
@@ -48,17 +50,18 @@ void mbuspico_hex_to_bin(const char* in, size_t len, unsigned char* out);
 void mbuspico_reboot();
 void mbuspico_reboot_into_bootloader();
 
-// UART data queue
+// UART/MBUS data queue
 typedef unsigned char byte;
 
-#define MAX_QUEUE_ITEM_SIZE 128
+#define MAX_QUEUE_ITEM_SIZE 	(128)
 
 typedef struct {
 	size_t len;
 	byte data[MAX_QUEUE_ITEM_SIZE];
 } xMBusData_t;
 
-extern QueueHandle_t g_DeviceEventQueue;
+extern QueueHandle_t g_DeviceDataQueue;
+
 
 #if MBUSPICO_WIFI_ENABLED
 
@@ -69,9 +72,9 @@ int mbuspico_wifi_get_state();
 int mbuspico_wifi_get_mode();
 void mbuspico_wifi_task(void*);
 
-#define MBUSPICO_WIFI_MODE_NOMODE	-1
-#define MBUSPICO_WIFI_MODE_STA 		0
-#define MBUSPICO_WIFI_MODE_AP		1
+#define MBUSPICO_WIFI_MODE_NOMODE	(-1)
+#define MBUSPICO_WIFI_MODE_STA 		(0)
+#define MBUSPICO_WIFI_MODE_AP		(1)
 
 typedef struct {
 	int link_state;	// wifi link state
@@ -90,7 +93,21 @@ void mbuspico_uart_task(void*);
 
 #if MBUSPICO_HTTP_ENABLED
 // http webserver interface
+
+#define WEBSOCKET_DATA_TYPE_LOGMSG	(1)
+
+typedef struct {
+	int type;
+	union {
+		char msg[MAX_LOG_MSG_SIZE]; // WEBSOCKET_DATA_TYPE_LOGMSG
+	};
+} xWebsocketData_t;
+
+extern QueueHandle_t g_WebsocketDataQueue;
+
 void mbuspico_http_task(void*);
+
+void mbuspico_urlencode(const char* s, char* enc);
 #endif
 
 #if MBUSPICO_UDP_ENABLED
@@ -98,8 +115,11 @@ void mbuspico_http_task(void*);
 void mbuspico_udp_task(void*);
 #endif
 
+void mbuspico_fs_init();
+void mbuspico_fs_task();
+
 // ####################################
-// CONFIG
+// FILESYSTEM / CONFIG
 // ####################################
 
 #define MBUSPICO_CONFIG_SIZE_STR	128
@@ -120,7 +140,9 @@ typedef enum {
 } mbuspico_config_t;
 
 int mbuspico_read_config(mbuspico_config_t config, byte* data, uint32_t data_size);
-int mbuspico_write_config(mbuspico_config_t config, byte* data, uint32_t data_size);
+int mbuspico_read_config_num(mbuspico_config_t config, int* data);
+int mbuspico_write_config(mbuspico_config_t config, const byte* data, uint32_t data_size);
+int mbuspico_write_config_num(mbuspico_config_t config, const int* val);
 
 // ####################################
 // LOGGING

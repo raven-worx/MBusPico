@@ -29,9 +29,9 @@ static void _mbuspico_wifi_sta_start() {
 }
 
 static void _mbuspico_wifi_sta_stop() {
-	cyw43_arch_disable_sta_mode();
-	mbuspico_wifi_state.link_state = CYW43_LINK_DOWN;
 	mbuspico_wifi_state.mode = MBUSPICO_WIFI_MODE_NOMODE;
+	mbuspico_wifi_state.link_state = CYW43_LINK_DOWN;
+	cyw43_arch_disable_sta_mode();
 	MBUSPICO_LOG_I(LOG_TAG_WIFI, "Wifi STA mode disabled");
 }
 
@@ -49,21 +49,13 @@ static void _mbuspico_wifi_ap_start() {
 }
 
 static void _mbuspico_wifi_ap_stop() {
-    dhcp_server_deinit(&mbuspico_wifi_state.dhcp_server);	// Stop the DHCP server
-	cyw43_arch_disable_ap_mode();
-	mbuspico_wifi_state.link_state = CYW43_LINK_DOWN;
 	mbuspico_wifi_state.mode = MBUSPICO_WIFI_MODE_NOMODE;
+	mbuspico_wifi_state.link_state = CYW43_LINK_DOWN;
+	cyw43_arch_disable_ap_mode();
 	MBUSPICO_LOG_I(LOG_TAG_WIFI, "Wifi AP mode disabled");
 }
 
 static int mbuspico_wifi_init() {
-#ifndef MBUSPICO_WIFI_SSID
-	#error "MBUSPICO_WIFI_SSID not defined. Not specified via options?"
-#endif
-#ifndef MBUSPICO_WIFI_PWD
-	#error "MBUSPICO_WIFI_PWD not defined. Not specified via options?"
-#endif
-
 	MBUSPICO_LOG_D(LOG_TAG_WIFI, "mbuspi_wifi_init() called");
 
 	mbuspico_wifi_state.link_state = CYW43_LINK_DOWN;
@@ -90,8 +82,17 @@ void mbuspico_wifi_task(void* arg) {
 	
 	mbuspico_wifi_init();
 
-	// TODO: check settings if to start in STA mode
-	_mbuspico_wifi_sta_start();
+	char wifi_ssid[MBUSPICO_CONFIG_SIZE_STR] = {0};
+	mbuspico_read_config(MBUSPICO_CONFIG_WIFI_SSID, wifi_ssid, sizeof(wifi_ssid));
+	char wifi_pwd[MBUSPICO_CONFIG_SIZE_STR] = {0};
+	mbuspico_read_config(MBUSPICO_CONFIG_WIFI_PWD, wifi_pwd, sizeof(wifi_pwd));
+
+	if (wifi_ssid[0] == '\0') { // empty wifi SSID = no wifi configured yet -> start in AP mode
+		_mbuspico_wifi_ap_start();
+	}
+	else {
+		_mbuspico_wifi_sta_start();
+	}
 
 	for (;;) {
 		switch (mbuspico_wifi_state.mode) {
@@ -131,8 +132,8 @@ void mbuspico_wifi_task(void* arg) {
 				}
 				
 				if (doConnect) {
-					MBUSPICO_LOG_I(LOG_TAG_WIFI, "Connecting to Wifi '%s'", MBUSPICO_WIFI_SSID);
-					if (cyw43_arch_wifi_connect_timeout_ms(MBUSPICO_WIFI_SSID, MBUSPICO_WIFI_PWD, CYW43_AUTH_WPA2_AES_PSK, 10000)) {
+					MBUSPICO_LOG_I(LOG_TAG_WIFI, "Connecting to Wifi '%s'", wifi_ssid);
+					if (cyw43_arch_wifi_connect_timeout_ms(wifi_ssid, wifi_pwd, CYW43_AUTH_WPA2_AES_PSK, 10000)) {
 						MBUSPICO_LOG_E(LOG_TAG_WIFI, "failed to connect Wifi");
 						mbuspico_wifi_state.link_state = CYW43_LINK_FAIL; // try again
 						failed_attempts += 1;

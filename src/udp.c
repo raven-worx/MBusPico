@@ -9,14 +9,6 @@
 
 #define UDP_CONNECT_TIMEOUT 2000
 
-static const int send_interval = 1000*
-#ifdef MBUSPICO_UDP_INTERVAL_S
-  MBUSPICO_UDP_INTERVAL_S
-#else
-  30
-#endif
-;
-
 typedef struct {
 	uint8_t done : 1;
 	long data_size;
@@ -72,33 +64,33 @@ static void mbuspico_send_udp(struct mg_connection *c, int ev, void *ev_data, vo
   	}
 }
 
-static int mbuspico_udp_init() {
-	MBUSPICO_LOG_D(LOG_TAG_UDP, "mbuspico_udp_init()");
-
-#ifndef MBUSPICO_UDP_RECEIVER_HOST
-	#error "MBUSPICO_UDP_RECEIVER_HOST not defined. Not specified via options?"
-#endif
-#ifndef MBUSPICO_UDP_RECEIVER_PORT
-	#error "MBUSPICO_UDP_RECEIVER_PORT not defined. Not specified via options?"
-#else
-	if (MBUSPICO_UDP_RECEIVER_PORT <= 0) {
-		MBUSPICO_LOG_E(LOG_TAG_UDP, "invalid UDP receiver port provided: '%d'", (uint16_t)MBUSPICO_UDP_RECEIVER_PORT);
-		return 1;
-	}
-#endif
-	return 0;
-}
-
 void mbuspico_udp_task(void* arg) {
 	MBUSPICO_LOG_D(LOG_TAG_UDP, "mbuspico_udp_task()");
-	
-	if (mbuspico_udp_init()) {
+
+	int udp_enabled = 0;
+	mbuspico_read_config_num(MBUSPICO_CONFIG_UDP_ENABLED, &udp_enabled);
+
+	int udp_port = -1;
+	mbuspico_read_config_num(MBUSPICO_CONFIG_UDP_PORT, &udp_port);
+
+	char udp_host[MBUSPICO_CONFIG_SIZE_STR] = {0};
+	mbuspico_read_config(MBUSPICO_CONFIG_UDP_RECEIVER, udp_host, sizeof(udp_host));
+
+	int send_interval = 0;
+	mbuspico_read_config_num(MBUSPICO_CONFIG_UDP_INTERVAL, &send_interval);
+	if (send_interval <= 0) {
+		send_interval = 30;
+	}
+	send_interval *= 1000; // to ms
+
+	if (udp_enabled <= 0 || udp_port <= 0 || strlen(udp_host) == 0) {
+		MBUSPICO_LOG_D(LOG_TAG_UDP, "Not executing UDP: Settings: enabled: %d, udp://%s:%d, interval: %d", udp_enabled, udp_host, udp_port, send_interval);
 		vTaskDelete(NULL);
 		return;
 	}
 
 	char receiver_addr[128] = {0};
-	snprintf(receiver_addr, sizeof(receiver_addr), "udp://%s:%d", MBUSPICO_UDP_RECEIVER_HOST, (uint16_t)MBUSPICO_UDP_RECEIVER_PORT);
+	snprintf(receiver_addr, sizeof(receiver_addr), "udp://%s:%d", udp_host, (uint16_t)udp_port);
 	
 	for(;;) {
 		while (mbuspico_wifi_get_state() == CYW43_LINK_UP) { // connected and assigned IP
@@ -115,9 +107,9 @@ void mbuspico_udp_task(void* arg) {
   			mg_mgr_free(&mgr);
 			MBUSPICO_LOG_D(LOG_TAG_UDP, "done");
 
-			vTaskDelay(pdMS_TO_TICKS(send_interval)); 
+			vTaskDelay(pdMS_TO_TICKS(send_interval));
 		}
-		vTaskDelay(pdMS_TO_TICKS(3000)); 
+		vTaskDelay(pdMS_TO_TICKS(3000));
 	}
 }
 

@@ -1,9 +1,58 @@
 #
+# WEB RESOURCE FILES
+#
+
+set(mbuspico_web_res_in
+	bootstrap.min.css
+	bootstrap.bundle.min.js
+	config.html
+	config.js
+)
+
+file(WRITE "web/include/web_res.h" "#pragma once\n\n")
+
+foreach(res_file IN LISTS mbuspico_web_res_in)
+	string(REPLACE "." "_" out_name ${res_file})
+	set(out_file "${CMAKE_CURRENT_LIST_DIR}/web/raw/${out_name}.raw.c")
+	add_custom_command(
+		DEPENDS web/${res_file}
+		OUTPUT ${out_file}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/web/
+		COMMAND "${CMAKE_CURRENT_LIST_DIR}/web/create_raw_res.sh" "${res_file}" "${out_name}"
+		COMMENT "-- Creating RAW webresource file: ${res_file} ..."
+		USES_TERMINAL
+	)
+	list(APPEND mbuspico_web_res_map "{\"/${res_file}\", __${out_name}, __${out_name}_size}")
+	list(APPEND mbuspico_web_res_inc ${out_name})
+	list(APPEND mbuspico_web_res_out ${out_file})
+endforeach()
+
+foreach(inc ${mbuspico_web_res_inc})
+	file(APPEND "web/include/web_res.h" "#include \"${inc}.raw.h\"\n")
+	#file(APPEND "web/include/web_res.h" "extern const unsigned char __${inc}[];\n")
+	#file(APPEND "web/include/web_res.h" "extern const unsigned int __${inc}_size;\n")
+endforeach()
+
+file(APPEND "web/include/web_res.h" "\nstruct web_res { const char* url; const unsigned char* data; const unsigned int size; };\n")
+file(APPEND "web/include/web_res.h" "const struct web_res g_web_resources[] = {\n")
+foreach(map ${mbuspico_web_res_map})
+	file(APPEND "web/include/web_res.h" "\t${map},\n")
+endforeach()
+file(APPEND "web/include/web_res.h" "};")
+
+add_library(mbuspico_web_res STATIC)
+target_sources(mbuspico_web_res PRIVATE ${mbuspico_web_res_out})
+target_include_directories(mbuspico_web_res
+PUBLIC
+	${CMAKE_CURRENT_LIST_DIR}/web/include
+)
+
+#
 # mbedtls
 # Just building mbedTLS crypto lib here. Using the offical CMakeLists results in incompatible binaries
 #
 
-SET(mbedtls_src_crypto
+set(mbedtls_src_crypto
 	aes.c
 	aesni.c
 	aria.c

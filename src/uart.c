@@ -19,12 +19,12 @@ static void on_uart_rx() {
 		d.data[d.len] = ch;
 		d.len++;
 		if (d.len == MAX_QUEUE_ITEM_SIZE) {
-			xQueueSendToBackFromISR(g_DeviceEventQueue, &d, 0);
+			xQueueSendToBackFromISR(g_DeviceDataQueue, &d, 0);
 			d.len = 0;
 		}
 	}
 	if (d.len > 0) {
-		xQueueSendToBackFromISR(g_DeviceEventQueue, &d, 0); 
+		xQueueSendToBackFromISR(g_DeviceDataQueue, &d, 0); 
 	}
 }
 
