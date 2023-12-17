@@ -74,7 +74,7 @@ target_link_libraries(${TARGETNAME}
 	pico_stdlib
 	pico_flash
 	mbuspico_web_res
-	FreeRTOS-Kernel-Heap4 # FreeRTOS kernel and dynamic heap
+	FreeRTOS-Kernel-Heap4
 	mbedtls_crypto
 	mongoose
 	littlefs
