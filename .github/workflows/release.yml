@@ -93,8 +93,9 @@ jobs:
     needs:
       - build-artifacts
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       
       - name: Build uf2
         uses: addnab/docker-run-action@v3
