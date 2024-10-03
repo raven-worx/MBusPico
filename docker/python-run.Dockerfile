@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1
 
 RUN set -ex \
-    && apt update && apt install -y python3-pycryptodome python3-serial \
+    && apt update && apt install -y python3-pycryptodome python3-serial python3-paho-mqtt \
     && apt autoremove -y \
     && apt clean -y \
     && rm -rf /var/lib/apt/lists/*

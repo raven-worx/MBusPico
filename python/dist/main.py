@@ -2,7 +2,7 @@
 
 from mbus import serial
 from mbus.devices import kaifa_ma309m_netznoe
-from provider import www, udp
+from provider import www, udp, mqtt
 import config
 import sys
 
@@ -50,6 +50,8 @@ async def handler_task():
 				METERDATA = meter
 				udp.METERDATA = meter
 				www.METERDATA = meter
+				if config.MBUSPICO_MQTT_ENABLED and sys.implementation.name != "micropython":
+					asyncio.create_task(mqtt.Send(meter, config))
 			else:
 				print("parsing meter data failed")
 		await asyncio.sleep(2) # [s]

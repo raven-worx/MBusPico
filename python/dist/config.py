@@ -55,3 +55,17 @@ MBUSPICO_HTTP_SERVER_PORT = OPTION("MBUSPICO_HTTP_SERVER_PORT", 80)
 # username/password required to view the meter data, if both are empty no authentication is required
 MBUSPICO_HTTP_AUTH_USER = OPTION("MBUSPICO_HTTP_AUTH_USER", "")
 MBUSPICO_HTTP_AUTH_PWD = OPTION("MBUSPICO_HTTP_AUTH_PWD", "")
+
+# --------- MQTT -----------
+
+# when 'True' the device should send the meter data via MQTT to a configured broker
+MBUSPICO_MQTT_ENABLED = OPTION("MBUSPICO_MQTT_ENABLED", False)
+# the network address of the MQTT broker
+MBUSPICO_MQTT_BROKER_ADDRESS = OPTION("MBUSPICO_MQTT_BROKER_ADDRESS", "")
+# the port of the MQTT broker
+MBUSPICO_MQTT_BROKER_PORT = OPTION("MBUSPICO_MQTT_BROKER_PORT", 1883)
+# username/password used for authentication on MQTT broker
+MBUSPICO_MQTT_AUTH_USER = OPTION("MBUSPICO_MQTT_AUTH_USER", "")
+MBUSPICO_MQTT_AUTH_PWD = OPTION("MBUSPICO_MQTT_AUTH_PWD", "")
+# MQTT topic prefix
+MBUSPICO_MQTT_TOPIC_PREFIX = OPTION("MBUSPICO_MQTT_TOPIC_PREFIX", "MBusPico")
