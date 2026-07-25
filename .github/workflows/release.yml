@@ -58,7 +58,7 @@ jobs:
           ARCHIVE_NAME: mbuspico.tar.gz
         id: create-archive-tar
       - name: Upload tar-archive artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifact-archive-tar
           path: dist/mbuspico.tar.gz
@@ -72,7 +72,7 @@ jobs:
           ARCHIVE_NAME: mbuspico.zip
         id: create-archive-zip
       - name: Upload zip-archive artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifact-archive-zip
           path: dist/mbuspico.zip
@@ -85,7 +85,7 @@ jobs:
           ARCHIVE_NAME: python.zip
         id: create-python-zip
       - name: Upload ypthon archive artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifact-archive-python
           path: dist/python.zip
@@ -168,19 +168,19 @@ jobs:
           prerelease: false
         
       - name: Download tar-archive artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: artifact-archive-tar
           path: dist
         
       - name: Download zip-archive artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: artifact-archive-zip
           path: dist
         
       - name: Download python artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: artifact-archive-python
           path: dist
