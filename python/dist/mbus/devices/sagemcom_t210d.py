@@ -44,8 +44,19 @@ _OBIS_METER_NUMBER = bytes([0x00, 0x00, 0x60, 0x01, 0x00, 0xFF])
 class Sagemcom_T210D(_mbusdevice._MBusDevice):
 	def __init__(self, key):
 		self._key = binascii.unhexlify(key)
+		self._frame1 = None
 
 	def parse_data(self, data):
+		if len(data) == 256:
+			self._frame1 = data
+			return None
+		if len(data) == 26 and self._frame1 is not None:
+			data = self._frame1 + data
+			self._frame1 = None
+		elif len(data) == 26:
+			print("Received frame 2 without frame 1")
+			return False
+
 		if len(data) < 256:
 			print("Received packet with invalid size:", len(data), "< 256")
 			return False

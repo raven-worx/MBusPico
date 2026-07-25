@@ -9,6 +9,36 @@ else:
 	import time
 
 _SERIAL = None
+_RX_BUFFER = bytearray()
+
+
+def _extract_mbus_frame():
+	global _RX_BUFFER
+	start = _RX_BUFFER.find(0x68)
+	if start < 0:
+		if len(_RX_BUFFER) > 0:
+			_RX_BUFFER = bytearray()
+		return None
+	if start > 0:
+		del _RX_BUFFER[:start]
+
+	if len(_RX_BUFFER) < 4:
+		return None
+	if _RX_BUFFER[1] != _RX_BUFFER[2] or _RX_BUFFER[3] != 0x68:
+		del _RX_BUFFER[0]
+		return None
+
+	frame_length = _RX_BUFFER[1]
+	total_length = 4 + frame_length + 2
+	if len(_RX_BUFFER) < total_length:
+		return None
+	if _RX_BUFFER[total_length - 1] != 0x16:
+		del _RX_BUFFER[0]
+		return None
+
+	frame = bytes(_RX_BUFFER[:total_length])
+	del _RX_BUFFER[:total_length]
+	return frame
 
 # MICROPYTHON
 if sys.implementation.name == "micropython":
@@ -68,12 +98,19 @@ async def uart_init():
 	print("initialized UART")
 
 async def uart_read():
+	global _RX_BUFFER
+	frame = _extract_mbus_frame()
+	if frame is not None:
+		return frame
+
 	lastRead = _get_time()
-	data = bytes()
 	while _time_diff(_get_time(),lastRead) < 1000:
 		chunk = _uart_read()
 		if len(chunk) > 0:
 			lastRead = _get_time()
-			data += chunk
+			_RX_BUFFER.extend(chunk)
+			frame = _extract_mbus_frame()
+			if frame is not None:
+				return frame
 		await asyncio.sleep(0.1)
-	return data
+	return bytes()

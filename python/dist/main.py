@@ -56,7 +56,9 @@ async def handler_task():
 		if len(data) > 0:
 			# parse meter data
 			meter = dev.parse_data(data)
-			if meter:
+			if meter is None:
+				pass
+			elif meter:
 				METERDATA = meter
 				udp.METERDATA = meter
 				www.METERDATA = meter
