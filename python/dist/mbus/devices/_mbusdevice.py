@@ -3,7 +3,10 @@ import binascii
 if sys.implementation.name == "micropython":
 	from cryptolib import aes
 else:
-	from Cryptodome.Cipher import AES
+	try:
+		from Cryptodome.Cipher import AES
+	except ImportError:
+		from Crypto.Cipher import AES
 
 class _MBusDevice:
 	def __init__(self):

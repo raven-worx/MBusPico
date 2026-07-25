@@ -32,7 +32,7 @@ static void mbuspico_uart_init() {
 	MBUSPICO_LOG_D(LOG_TAG_UART, "mbuspico_uart_init()");
 	
 	// Set up UART with a basic baud rate
-	uart_init(UART_ID, 2400);
+	uart_init(UART_ID, BAUD_RATE);
 	
 	// Set the TX and RX pins by using the function select on the GPIO
 	gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART); // actually not used

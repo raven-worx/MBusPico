@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from mbus import serial
-from mbus.devices import kaifa_ma309m_netznoe
+from mbus.devices import kaifa_ma309m_netznoe, sagemcom_t210d
 from provider import www, udp, mqtt
 import config
 import sys
@@ -23,8 +23,18 @@ async def connect_wifi(wlan,ssid,password):
 	print("WIFI connected:", wlan.ifconfig())
 
 
+def create_device():
+	device_name = config.MBUSPICO_DEVICE.upper()
+	if device_name == "KAIFA_MA309M_NETZNOE":
+		return kaifa_ma309m_netznoe.Kaifa_MA309M_NetzNoe(config.MBUSPICO_DEVICE_KEY)
+	if device_name == "SAGEMCOM_T210D":
+		return sagemcom_t210d.Sagemcom_T210D(config.MBUSPICO_DEVICE_KEY)
+	raise ValueError("Unsupported MBUSPICO_DEVICE: " + config.MBUSPICO_DEVICE)
+
+
 async def handler_task():
-	dev = kaifa_ma309m_netznoe.Kaifa_MA309M_NetzNoe(config.MBUSPICO_DEVICE_KEY)
+	dev = create_device()
+	print("selected meter profile:", config.MBUSPICO_DEVICE)
 
 	await serial.uart_init()
 	

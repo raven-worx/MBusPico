@@ -4,18 +4,21 @@ on:
   push:
     tags:
       - 'v*.*'
-    inputs:
-      create_release:
-        description: 'Create Release'
-        required: false
-        default: 'true'
   # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
       create_release:
-        description: 'Create Release'
+        description: 'Create Release (`true`, `false`, or `draft`)'
         required: false
-        default: 'draft'
+        default: 'false'
+      docker_image_tag:
+        description: 'Docker image tag for manual runs'
+        required: false
+        default: 'devtest'
+      docker_push_latest:
+        description: 'Also push `latest` on manual runs (`true` or `false`)'
+        required: false
+        default: 'false'
 
 jobs:
   build-artifacts:
@@ -106,7 +109,28 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-        
+
+      - name: Resolve Docker tags
+        id: docker-tags
+        run: |
+          {
+            echo 'tags<<EOF'
+            if [[ "$GITHUB_EVENT_NAME" == "push" && "$VERSION_NUM" != "0.0" ]]; then
+              echo 'ravenworx/mbuspico:latest'
+              echo "ravenworx/mbuspico:${VERSION_NUM}"
+            else
+              echo "ravenworx/mbuspico:${DOCKER_IMAGE_TAG}"
+              if [[ "$DOCKER_PUSH_LATEST" == "true" ]]; then
+                echo 'ravenworx/mbuspico:latest'
+              fi
+            fi
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+        env:
+          VERSION_NUM: ${{ needs.build-artifacts.outputs.version_num }}
+          DOCKER_IMAGE_TAG: ${{ github.event.inputs.docker_image_tag || 'devtest' }}
+          DOCKER_PUSH_LATEST: ${{ github.event.inputs.docker_push_latest || 'false' }}
+         
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
@@ -114,7 +138,7 @@ jobs:
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           file: docker/python-run.Dockerfile
           push: true
-          tags: ravenworx/mbuspico:latest, ravenworx/mbuspico:${{needs.build-artifacts.outputs.version_num}}
+          tags: ${{ steps.docker-tags.outputs.tags }}
   
   create-release:
     runs-on: ubuntu-latest

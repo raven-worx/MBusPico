@@ -7,7 +7,12 @@
 
 This project was created mostly out of interest and the wish to read out and display my power meter data in my Loxone smart home setup. (Thus the option with the 24V power supply - see below)
 
-Currently the only smart meter device supported is the **Kaifa MA309M** (Austrian power provider Netz NÖ), but could be extended to any other model. Credits for the data intepretation code goes out to **[firegore/esphome-dlms-meter](https://github.com/firegore/esphome-dlms-meter)**!
+Currently the following smart meter devices are supported:
+
+* **Kaifa MA309M** (Netz NÖ / EVN style M-Bus telegram)
+* **Sagemcom T210-D** (Netz NÖ / EVN style M-Bus telegram)
+
+Credits for the Kaifa data intepretation code goes out to **[firegore/esphome-dlms-meter](https://github.com/firegore/esphome-dlms-meter)**!
 
 The read meter data values are published via HTTP and/or UDP in JSON format:
 
@@ -107,6 +112,7 @@ After the build of the docker image has finished (might take a few minutes) simp
 
 | **Option**            | Default value | **required**            |  **Description** |
 | --------------------- | ------------- | ----------------------- |  --------------- |
+| MBUSPICO_DEVICE       | KAIFA_MA309M_NETZNOE | yes              | meter profile to build/run. Supported values: `KAIFA_MA309M_NETZNOE`, `SAGEMCOM_T210D` |
 | MBUSPICO_DEVICE_KEY   |               | yes / device dependant  | Key used to decrypt data read from the meter. Must be requested from the power provider. |
 | MBUSPICO_LOG_LEVEL    | LOG_ERROR     | no                      | level of log verbosity. Possible values: LOG_NONE, LOG_ERROR, LOG_INFO, LOG_DEBUG |
 | MBUSPICO_WIFI_ENABLED | ON            | no                      | specifies if the device should connect to wifi network |

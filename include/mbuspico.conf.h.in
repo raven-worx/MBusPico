@@ -1,5 +1,6 @@
 #pragma once
 
+#cmakedefine MBUSPICO_DEVICE "@MBUSPICO_DEVICE@" // mandatory
 #cmakedefine MBUSPICO_DEVICE_KEY "@MBUSPICO_DEVICE_KEY@" // optional, depending on device
 #cmakedefine MBUSPICO_LOG_LEVEL @MBUSPICO_LOG_LEVEL@ // optional, default LOG_ERROR
 
