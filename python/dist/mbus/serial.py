@@ -46,11 +46,7 @@ else:
 	
 	def _uart_init():
 		global _SERIAL
-		_SERIAL = serial.Serial(config.MBUSPICO_SERIAL_PORT,
-			2400,
-			bytesize=serial.EIGHTBITS,
-			parity=serial.PARITY_EVEN,
-			stopbits=serial.STOPBITS_ONE)
+		_SERIAL = serial.Serial(config.MBUSPICO_SERIAL_PORT, 2400)
 	
 	def _uart_read():
 		global _SERIAL
