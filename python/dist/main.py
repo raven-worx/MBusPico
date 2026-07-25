@@ -64,7 +64,7 @@ async def handler_task():
 					asyncio.create_task(mqtt.Send(meter, config))
 			else:
 				print("parsing meter data failed")
-		await asyncio.sleep(2) # [s]
+		await asyncio.sleep(0)
 
 async def main():
 	tasks = []
