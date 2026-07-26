@@ -11,6 +11,14 @@ else:
 class _MBusDevice:
 	def __init__(self):
 		pass
+
+	def uart_config(self):
+		return {
+			"baudrate": 2400,
+			"data_bits": 8,
+			"stop_bits": 1,
+			"parity": "EVEN",
+		}
 	
 	def strftime(self, ts):
 		if sys.implementation.name == "micropython":

@@ -36,7 +36,7 @@ async def handler_task():
 	dev = create_device()
 	print("selected meter profile:", config.MBUSPICO_DEVICE)
 
-	await serial.uart_init()
+	await serial.uart_init(dev)
 	
 	if config.MBUSPICO_WIFI_ENABLED and sys.implementation.name == "micropython":
 		wifi_hostname = config.MBUSPICO_WIFI_HOSTNAME if config.MBUSPICO_WIFI_HOSTNAME else "MBusPico"
@@ -57,8 +57,10 @@ async def handler_task():
 			# parse meter data
 			meter = dev.parse_data(data)
 			if meter is None:
+				# Some meter profiles buffer frame 1 until the 26-byte continuation arrives.
 				pass
 			elif meter:
+				print(meter.to_json())
 				METERDATA = meter
 				udp.METERDATA = meter
 				www.METERDATA = meter

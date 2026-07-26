@@ -35,6 +35,19 @@ typedef struct {
 	char meterNumber[13];		// 123456789012
 } MeterData_t;
 
+typedef enum {
+	MBUSPICO_UART_PARITY_NONE = 0,
+	MBUSPICO_UART_PARITY_EVEN = 1,
+	MBUSPICO_UART_PARITY_ODD = 2,
+} MBusPicoUARTParity_t;
+
+typedef struct {
+	uint32_t baudRate;
+	uint8_t dataBits;
+	uint8_t stopBits;
+	MBusPicoUARTParity_t parity;
+} MBusPicoUARTConfig_t;
+
 void mbuspico_print_meterdata(void);
 size_t mbuspico_get_meterdata_json(char* data_buffer, size_t buffer_size);
 void mbuspico_set_meterdata(MeterData_t* data);
@@ -68,6 +81,7 @@ void mbuspico_wifi_task(void*);
 
 // device interface
 const char* mbuspico_device_name();
+MBusPicoUARTConfig_t mbuspico_device_uart_config(void);
 void mbuspico_device_task(void*);
 
 // uart interface

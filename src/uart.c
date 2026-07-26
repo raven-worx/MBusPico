@@ -3,13 +3,21 @@
 #include <hardware/irq.h>
 
 #define UART_ID 	uart1
-#define BAUD_RATE 	2400
-#define DATA_BITS 	8
-#define STOP_BITS 	1
-#define PARITY		UART_PARITY_EVEN
 
 #define UART_TX_PIN 4
 #define UART_RX_PIN 5
+
+static uart_parity_t mbuspico_uart_parity(MBusPicoUARTParity_t parity) {
+	switch (parity) {
+		case MBUSPICO_UART_PARITY_NONE:
+			return UART_PARITY_NONE;
+		case MBUSPICO_UART_PARITY_ODD:
+			return UART_PARITY_ODD;
+		case MBUSPICO_UART_PARITY_EVEN:
+		default:
+			return UART_PARITY_EVEN;
+	}
+}
 
 // UART RX interrupt handler
 static void on_uart_rx() {
@@ -30,22 +38,23 @@ static void on_uart_rx() {
 
 static void mbuspico_uart_init() {
 	MBUSPICO_LOG_D(LOG_TAG_UART, "mbuspico_uart_init()");
+	MBusPicoUARTConfig_t uartConfig = mbuspico_device_uart_config();
 	
 	// Set up UART with a basic baud rate
-	uart_init(UART_ID, BAUD_RATE);
+	uart_init(UART_ID, uartConfig.baudRate);
 	
 	// Set the TX and RX pins by using the function select on the GPIO
 	gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART); // actually not used
 	gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
 	
 	// The call will return the actual baud rate selected, which will be as close as possible to the requested one
-	int __unused actual = uart_set_baudrate(UART_ID, BAUD_RATE);
+	int __unused actual = uart_set_baudrate(UART_ID, uartConfig.baudRate);
 	
 	// Set UART flow control CTS/RTS, we don't want these, so turn them off
 	uart_set_hw_flow(UART_ID, false, false);
 	
 	// Set our data format
-	uart_set_format(UART_ID, DATA_BITS, STOP_BITS, PARITY);
+	uart_set_format(UART_ID, uartConfig.dataBits, uartConfig.stopBits, mbuspico_uart_parity(uartConfig.parity));
 	
 	// Turn off FIFO's - we want to do this character by character
 	uart_set_fifo_enabled(UART_ID, false);
@@ -62,7 +71,9 @@ static void mbuspico_uart_init() {
 	// Now enable the UART to send interrupts - RX only
 	uart_set_irq_enables(UART_ID, true, false);
 	
-	MBUSPICO_LOG_D(LOG_TAG_UART, "UART initialized");
+	MBUSPICO_LOG_D(LOG_TAG_UART, "UART initialized: %lu %u%s%u", uartConfig.baudRate, uartConfig.dataBits,
+		uartConfig.parity == MBUSPICO_UART_PARITY_NONE ? "N" : uartConfig.parity == MBUSPICO_UART_PARITY_ODD ? "O" : "E",
+		uartConfig.stopBits);
 }
 
 void mbuspico_uart_task(void* arg) {

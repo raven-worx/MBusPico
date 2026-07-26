@@ -46,6 +46,14 @@ class Sagemcom_T210D(_mbusdevice._MBusDevice):
 		self._key = binascii.unhexlify(key)
 		self._frame1 = None
 
+	def uart_config(self):
+		return {
+			"baudrate": 2400,
+			"data_bits": 8,
+			"stop_bits": 1,
+			"parity": "EVEN",
+		}
+
 	def parse_data(self, data):
 		if len(data) == 256:
 			self._frame1 = data

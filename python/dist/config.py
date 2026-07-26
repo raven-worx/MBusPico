@@ -23,9 +23,6 @@ MBUSPICO_DEVICE_KEY = OPTION("MBUSPICO_DEVICE_KEY", "")
 
 # the serial port to read smart meter data from
 MBUSPICO_SERIAL_PORT = OPTION("MBUSPICO_SERIAL_PORT", "/dev/ttyS0")
-# host-side UART parity used by the serial interface
-# valid values: EVEN, E, NONE, N
-MBUSPICO_SERIAL_PARITY = OPTION("MBUSPICO_SERIAL_PARITY", "EVEN")
 
 # ---------- WIFI ----------
 #  NOTE: only used when running on RaspberryPi Pico / MicroPython

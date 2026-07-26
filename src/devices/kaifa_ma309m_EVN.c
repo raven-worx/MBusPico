@@ -126,6 +126,11 @@ static unsigned long lastRead = 0; // Timestamp when data was last read
 static byte key[16];
 static size_t keyLength = 0;
 
+MBusPicoUARTConfig_t mbuspico_device_uart_config(void) {
+	MBusPicoUARTConfig_t config = {2400, 8, 1, MBUSPICO_UART_PARITY_EVEN};
+	return config;
+}
+
 static void abort() {
 	receiveBufferIndex = 0;
 }

@@ -14,6 +14,10 @@
 #define DLMS_IC_OFFSET 22
 #define DLMS_IC_LENGTH 4
 #define READ_BUFFER_SIZE 1024
+#define MBUS_START 0x68
+#define MBUS_STOP 0x16
+#define FRAME1_LENGTH 256
+#define FRAME2_LENGTH 26
 
 #define DATA_TYPE_OCTET_STRING 0x09
 #define DATA_TYPE_DOUBLE_LONG_UNSIGNED 0x06
@@ -42,9 +46,17 @@ static unsigned long lastRead = 0;
 
 static byte key[16];
 static size_t keyLength = 0;
+static byte pendingFrame1[FRAME1_LENGTH];
+static size_t pendingFrame1Length = 0;
+
+MBusPicoUARTConfig_t mbuspico_device_uart_config(void) {
+	MBusPicoUARTConfig_t config = {2400, 8, 1, MBUSPICO_UART_PARITY_EVEN};
+	return config;
+}
 
 static void abort_receive(void) {
 	receiveBufferIndex = 0;
+	pendingFrame1Length = 0;
 }
 
 static void log_packet(const byte array[], size_t length) {
@@ -224,14 +236,133 @@ static void parse_obis_values(const byte* plaintext, size_t plaintextLength, Met
 	}
 }
 
+static int extract_mbus_frame(byte* frame, size_t* frameLength) {
+	int start = -1;
+	for (int i = 0; i < receiveBufferIndex; ++i) {
+		if (receiveBuffer[i] == MBUS_START) {
+			start = i;
+			break;
+		}
+	}
+	if (start < 0) {
+		receiveBufferIndex = 0;
+		return 0;
+	}
+	if (start > 0) {
+		memmove(receiveBuffer, &receiveBuffer[start], receiveBufferIndex - start);
+		receiveBufferIndex -= start;
+	}
+
+	if (receiveBufferIndex < 4) {
+		return 0;
+	}
+	if (receiveBuffer[1] != receiveBuffer[2] || receiveBuffer[3] != MBUS_START) {
+		memmove(receiveBuffer, &receiveBuffer[1], receiveBufferIndex - 1);
+		receiveBufferIndex -= 1;
+		return 0;
+	}
+
+	size_t totalLength = 4 + receiveBuffer[1] + 2;
+	if (totalLength > READ_BUFFER_SIZE) {
+		memmove(receiveBuffer, &receiveBuffer[1], receiveBufferIndex - 1);
+		receiveBufferIndex -= 1;
+		return 0;
+	}
+	if ((size_t)receiveBufferIndex < totalLength) {
+		return 0;
+	}
+	if (receiveBuffer[totalLength - 1] != MBUS_STOP) {
+		memmove(receiveBuffer, &receiveBuffer[1], receiveBufferIndex - 1);
+		receiveBufferIndex -= 1;
+		return 0;
+	}
+
+	memcpy(frame, receiveBuffer, totalLength);
+	memmove(receiveBuffer, &receiveBuffer[totalLength], receiveBufferIndex - totalLength);
+	receiveBufferIndex -= (int)totalLength;
+	*frameLength = totalLength;
+	return 1;
+}
+
+static int handle_packet(const byte* data, size_t dataLength) {
+	const uint16_t payloadLength = 243;
+	const uint16_t payloadLength1 = 228;
+	const uint16_t payloadLength2 = payloadLength - payloadLength1;
+
+	if (dataLength < FRAME1_LENGTH) {
+		MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Received packet with invalid size");
+		return 0;
+	}
+	if (dataLength <= payloadLength || payloadLength2 >= dataLength - DLMS_HEADER2_OFFSET - DLMS_HEADER2_LENGTH) {
+		MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Payload length is too big for received data");
+		return 0;
+	}
+
+	MBUSPICO_LOG_D(LOG_TAG_DEVICE, "Handling packet");
+	log_packet(data, dataLength);
+
+	byte iv[12] = {0};
+	memcpy(&iv[0], &data[DLMS_SYST_OFFSET], DLMS_SYST_LENGTH);
+	memcpy(&iv[8], &data[DLMS_IC_OFFSET], DLMS_IC_LENGTH);
+
+	byte ciphertext[payloadLength];
+	memcpy(&ciphertext[0], &data[DLMS_HEADER1_LENGTH], payloadLength1);
+	memcpy(&ciphertext[payloadLength1], &data[DLMS_HEADER2_OFFSET + DLMS_HEADER2_LENGTH], payloadLength2);
+
+	byte plaintext[payloadLength];
+	mbedtls_gcm_init(&aes);
+	mbedtls_gcm_setkey(&aes, MBEDTLS_CIPHER_ID_AES, key, keyLength * 8);
+	mbedtls_gcm_auth_decrypt(&aes, payloadLength, iv, sizeof(iv), NULL, 0, NULL, 0, ciphertext, plaintext);
+	mbedtls_gcm_free(&aes);
+
+	if (plaintext[0] != 0x0F || plaintext[5] != 0x0C) {
+		MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Packet was decrypted but data is invalid");
+		return 0;
+	}
+
+	MeterData_t meterData;
+	memset(&meterData, 0, sizeof(MeterData_t));
+	parse_timestamp(plaintext, payloadLength, &meterData);
+	parse_meter_number(plaintext, payloadLength, &meterData);
+	parse_obis_values(plaintext, payloadLength, &meterData);
+
+	MBUSPICO_LOG_I(LOG_TAG_DEVICE, "Received valid data");
+	mbuspico_set_meterdata(&meterData);
+	return 1;
+}
+
+static void handle_frame(const byte* frame, size_t frameLength) {
+	if (frameLength == FRAME1_LENGTH) {
+		memcpy(pendingFrame1, frame, frameLength);
+		pendingFrame1Length = frameLength;
+		MBUSPICO_LOG_D(LOG_TAG_DEVICE, "Buffered frame 1, waiting for frame 2");
+		return;
+	}
+	if (frameLength == FRAME2_LENGTH && pendingFrame1Length == FRAME1_LENGTH) {
+		byte packet[FRAME1_LENGTH + FRAME2_LENGTH];
+		memcpy(packet, pendingFrame1, pendingFrame1Length);
+		memcpy(&packet[pendingFrame1Length], frame, frameLength);
+		pendingFrame1Length = 0;
+		handle_packet(packet, sizeof(packet));
+		return;
+	}
+	if (frameLength == FRAME2_LENGTH) {
+		MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Received frame 2 without frame 1");
+		return;
+	}
+
+	MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Unexpected M-Bus frame length: %u", (unsigned int)frameLength);
+}
+
 static void loop(void) {
 	uint64_t currentTime = mbuspico_time_ms();
 
 	xMBusData_t d;
 	while (available(&d)) {
-		if (receiveBufferIndex >= READ_BUFFER_SIZE) {
+		if (receiveBufferIndex + (int)d.len > READ_BUFFER_SIZE) {
 			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Buffer overflow");
-			receiveBufferIndex = 0;
+			abort_receive();
+			break;
 		}
 		for (int i = 0; i < d.len; ++i) {
 			receiveBuffer[receiveBufferIndex++] = d.data[i];
@@ -239,53 +370,15 @@ static void loop(void) {
 		lastRead = currentTime;
 	}
 
+	byte frame[READ_BUFFER_SIZE] = {0};
+	size_t frameLength = 0;
+	while (extract_mbus_frame(frame, &frameLength)) {
+		handle_frame(frame, frameLength);
+	}
+
 	if (receiveBufferIndex > 0 && currentTime - lastRead > 2500) {
-		MBUSPICO_LOG_D(LOG_TAG_DEVICE, "receiveBufferIndex: %d", receiveBufferIndex);
-		if (receiveBufferIndex < 256) {
-			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Received packet with invalid size");
-			return abort_receive();
-		}
-
-		MBUSPICO_LOG_D(LOG_TAG_DEVICE, "Handling packet");
-		log_packet(receiveBuffer, receiveBufferIndex);
-
-		const uint16_t payloadLength = 243;
-		const uint16_t payloadLength1 = 228;
-		const uint16_t payloadLength2 = payloadLength - payloadLength1;
-
-		if (receiveBufferIndex <= payloadLength || payloadLength2 >= receiveBufferIndex - DLMS_HEADER2_OFFSET - DLMS_HEADER2_LENGTH) {
-			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Payload length is too big for received data");
-			return abort_receive();
-		}
-
-		byte iv[12] = {0};
-		memcpy(&iv[0], &receiveBuffer[DLMS_SYST_OFFSET], DLMS_SYST_LENGTH);
-		memcpy(&iv[8], &receiveBuffer[DLMS_IC_OFFSET], DLMS_IC_LENGTH);
-
-		byte ciphertext[payloadLength];
-		memcpy(&ciphertext[0], &receiveBuffer[DLMS_HEADER1_LENGTH], payloadLength1);
-		memcpy(&ciphertext[payloadLength1], &receiveBuffer[DLMS_HEADER2_OFFSET + DLMS_HEADER2_LENGTH], payloadLength2);
-
-		byte plaintext[payloadLength];
-		mbedtls_gcm_init(&aes);
-		mbedtls_gcm_setkey(&aes, MBEDTLS_CIPHER_ID_AES, key, keyLength * 8);
-		mbedtls_gcm_auth_decrypt(&aes, payloadLength, iv, sizeof(iv), NULL, 0, NULL, 0, ciphertext, plaintext);
-		mbedtls_gcm_free(&aes);
-
-		if (plaintext[0] != 0x0F || plaintext[5] != 0x09 || plaintext[6] != 0x0C) {
-			MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Packet was decrypted but data is invalid");
-			return abort_receive();
-		}
-
-		MeterData_t meterData;
-		memset(&meterData, 0, sizeof(MeterData_t));
-		parse_timestamp(plaintext, payloadLength, &meterData);
-		parse_meter_number(plaintext, payloadLength, &meterData);
-		parse_obis_values(plaintext, payloadLength, &meterData);
-
+		MBUSPICO_LOG_E(LOG_TAG_DEVICE, "Timed out waiting for complete M-Bus frame");
 		receiveBufferIndex = 0;
-		MBUSPICO_LOG_I(LOG_TAG_DEVICE, "Received valid data");
-		mbuspico_set_meterdata(&meterData);
 	}
 }
 
