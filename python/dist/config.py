@@ -15,12 +15,13 @@ else:
 # You must request this key for your Smart Meter from your power provider
 # The key must be exactly 32 characters long (hex format -> only alphanumeric characters [a-f0-9])
 #  e.g. '1A2B3CFF1234DE567890F1234DE5EE85'
+MBUSPICO_DEVICE = OPTION("MBUSPICO_DEVICE", "KAIFA_MA309M_NETZNOE")
 MBUSPICO_DEVICE_KEY = OPTION("MBUSPICO_DEVICE_KEY", "")
 
 # ------ SERIAL PORT -------
 #  NOTE: only used when running on Raspberry Pi / CPython
 
-# the serial port to read MBus data from
+# the serial port to read smart meter data from
 MBUSPICO_SERIAL_PORT = OPTION("MBUSPICO_SERIAL_PORT", "/dev/ttyS0")
 
 # ---------- WIFI ----------

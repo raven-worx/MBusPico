@@ -35,6 +35,18 @@ include_directories(
 	FreeRTOS
 )
 
+if (MBUSPICO_DEVICE STREQUAL "KAIFA_MA309M_NETZNOE")
+	set(MBUSPICO_DEVICE_SOURCE src/devices/kaifa_ma309m_EVN.c)
+	set(MBUSPICO_DEVICE_DEFINE MBUSPICO_DEVICE_KAIFA_MA309M_NETZNOE=1)
+	message(STATUS "Building meter profile: ${MBUSPICO_DEVICE}")
+elseif (MBUSPICO_DEVICE STREQUAL "SAGEMCOM_T210D")
+	set(MBUSPICO_DEVICE_SOURCE src/devices/sagemcom_t210d.c)
+	set(MBUSPICO_DEVICE_DEFINE MBUSPICO_DEVICE_SAGEMCOM_T210D=1)
+	message(STATUS "Building meter profile: ${MBUSPICO_DEVICE}")
+else()
+	message(FATAL_ERROR "Unsupported MBUSPICO_DEVICE '${MBUSPICO_DEVICE}'")
+endif()
+
 add_executable(${TARGETNAME}
 	src/main.c
 	src/wifi.c
@@ -42,7 +54,7 @@ add_executable(${TARGETNAME}
 	src/mbuspico.c
 	src/http.c
 	src/udp.c
-	src/devices/kaifa_ma309m_EVN.c
+	${MBUSPICO_DEVICE_SOURCE}
 )
 
 include(FreeRTOS/FreeRTOS_Kernel_import.cmake)
@@ -54,6 +66,7 @@ PUBLIC
 	PROJECT_VERSION="${PROJECT_VERSION}"
 	PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS=5000
 	CYW43_HOST_NAME="${MBUSPICO_WIFI_HOSTNAME}"
+	${MBUSPICO_DEVICE_DEFINE}
 PRIVATE
 	$<$<CONFIG:DEBUG>:_DEBUG=1>
 	$<$<STREQUAL:${CMAKE_HOST_SYSTEM_NAME},Windows>:_BUILD_HOST_WINDOWS=1>
