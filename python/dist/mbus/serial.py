@@ -73,10 +73,30 @@ else:
 	import serial
 	import os
 	from datetime import datetime
+
+	def _get_serial_parity():
+		parity_name = str(config.MBUSPICO_SERIAL_PARITY).upper()
+		parity_map = {
+			"E": serial.PARITY_EVEN,
+			"EVEN": serial.PARITY_EVEN,
+			"N": serial.PARITY_NONE,
+			"NONE": serial.PARITY_NONE,
+		}
+		if parity_name not in parity_map:
+			raise ValueError("Unsupported MBUSPICO_SERIAL_PARITY: " + str(config.MBUSPICO_SERIAL_PARITY))
+		return parity_name, parity_map[parity_name]
 	
 	def _uart_init():
 		global _SERIAL
-		_SERIAL = serial.Serial(config.MBUSPICO_SERIAL_PORT, 2400)
+		parity_name, parity = _get_serial_parity()
+		_SERIAL = serial.Serial(
+			config.MBUSPICO_SERIAL_PORT,
+			2400,
+			bytesize=serial.EIGHTBITS,
+			parity=parity,
+			stopbits=serial.STOPBITS_ONE,
+		)
+		print("configured serial parity:", parity_name)
 	
 	def _uart_read():
 		global _SERIAL
