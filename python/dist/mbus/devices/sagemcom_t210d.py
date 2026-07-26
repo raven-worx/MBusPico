@@ -49,6 +49,7 @@ class Sagemcom_T210D(_mbusdevice._MBusDevice):
 	def parse_data(self, data):
 		if len(data) == 256:
 			self._frame1 = data
+			print("Buffered frame 1, waiting for frame 2")
 			return None
 		if len(data) == 26 and self._frame1 is not None:
 			data = self._frame1 + data
@@ -77,7 +78,7 @@ class Sagemcom_T210D(_mbusdevice._MBusDevice):
 		ciphertext += data[_DLMS_HEADER2_END:_DLMS_HEADER2_END + payload_length2]
 		plaintext = self._decrypt_aes_gcm(self._key, ciphertext, iv)
 
-		if len(plaintext) < 7 or plaintext[0] != 0x0F or plaintext[5] != 0x09 or plaintext[6] != 0x0C:
+		if len(plaintext) < 6 or plaintext[0] != 0x0F or plaintext[5] != 0x0C:
 			print("Packet was decrypted but data is invalid")
 			return False
 
