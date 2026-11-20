@@ -73,6 +73,8 @@ async def handler_task():
 async def main():
 	tasks = []
 	
+	if config.MBUSPICO_MQTT_ENABLED and sys.implementation.name != "micropython":
+		mqtt.setup(config) # resolve MQTT broker
 	if config.MBUSPICO_UDP_ENABLED:
 		tasks.append(asyncio.create_task(udp.run(config))) # udp sender
 	if config.MBUSPICO_HTTP_ENABLED:

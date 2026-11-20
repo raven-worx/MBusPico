@@ -120,3 +120,6 @@ MBUSPICO_MQTT_AUTH_USER = OPTION("MBUSPICO_MQTT_AUTH_USER", "")
 MBUSPICO_MQTT_AUTH_PWD = OPTION("MBUSPICO_MQTT_AUTH_PWD", "")
 # MQTT topic prefix
 MBUSPICO_MQTT_TOPIC_PREFIX = OPTION("MBUSPICO_MQTT_TOPIC_PREFIX", "MBusPico")
+# Home Assistant only: when 'True' the meter values are announced to Home Assistant (MQTT discovery),
+# so they appear as sensors automatically. Requires Home Assistant to use the same MQTT broker.
+MBUSPICO_HA_MQTT_DISCOVERY = OPTION("MBUSPICO_HA_MQTT_DISCOVERY", False)
