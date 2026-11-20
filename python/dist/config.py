@@ -4,8 +4,58 @@ if sys.implementation.name == "micropython":
 		return value
 else:
 	import os
+	import json
+
+	# Settings are taken from (first match wins):
+	#  1. the Home Assistant add-on options (only present when running as Home Assistant add-on)
+	#  2. environment variables (e.g. when running in Docker)
+	#  3. the default values below
+	_ADDON_OPTIONS_FILE = os.getenv("MBUSPICO_ADDON_OPTIONS_FILE", "/data/options.json")
+
+	# Home Assistant add-on option names which differ from the default naming
+	# (environment variable name without the "MBUSPICO_" prefix in lower case)
+	_ADDON_OPTION_NAMES = {
+		"MBUSPICO_HTTP_AUTH_PWD": "http_auth_password",
+		"MBUSPICO_MQTT_AUTH_USER": "mqtt_user",
+		"MBUSPICO_MQTT_AUTH_PWD": "mqtt_password",
+		"MBUSPICO_UDP_INTERVAL_S": "udp_interval",
+	}
+
+	def _load_addon_options():
+		try:
+			with open(_ADDON_OPTIONS_FILE) as f:
+				return json.load(f)
+		except FileNotFoundError:
+			return {}
+
+	_ADDON_OPTIONS = _load_addon_options()
+
+	def _to_type(name, value, defaultValue):
+		# environment variables are always strings: convert them to the type of the default value
+		if isinstance(defaultValue, bool):
+			if isinstance(value, bool):
+				return value
+			text = str(value).strip().lower()
+			if text in ("1", "true", "on", "yes"):
+				return True
+			if text in ("0", "false", "off", "no", ""):
+				return False
+			raise ValueError("Invalid value for " + name + " (expected true/false): " + str(value))
+		if isinstance(defaultValue, int):
+			try:
+				return int(value)
+			except ValueError:
+				raise ValueError("Invalid value for " + name + " (expected a number): " + str(value))
+		return str(value)
+
 	def OPTION(name,defaultValue):
-		return os.getenv(name,defaultValue)
+		key = _ADDON_OPTION_NAMES.get(name, name[len("MBUSPICO_"):].lower())
+		value = _ADDON_OPTIONS.get(key)
+		if value is None:
+			value = os.getenv(name)
+		if value is None:
+			return defaultValue
+		return _to_type(name, value, defaultValue)
 
 #################################
 #  USER CONFIGURATION
