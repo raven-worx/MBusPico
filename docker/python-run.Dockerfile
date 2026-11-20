@@ -16,5 +16,12 @@ RUN set -ex \
 
 COPY python/dist /opt/mbuspico/
 
+# labels used by Home Assistant, as the image is also used for the Home Assistant add-on
+ARG BUILD_VERSION=dev
+LABEL io.hass.name="MBusPico" \
+      io.hass.description="Reads smart meter data via M-Bus and provides it via MQTT, HTTP and UDP" \
+      io.hass.type="addon" \
+      io.hass.version="${BUILD_VERSION}"
+
 WORKDIR /opt/mbuspico
 ENTRYPOINT ["python3", "/opt/mbuspico/main.py"]

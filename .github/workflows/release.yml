@@ -125,6 +125,11 @@ jobs:
               fi
             fi
             echo 'EOF'
+            if [[ "$GITHUB_EVENT_NAME" == "push" && "$VERSION_NUM" != "0.0" ]]; then
+              echo "version=${VERSION_NUM}"
+            else
+              echo "version=${DOCKER_IMAGE_TAG}"
+            fi
           } >> "$GITHUB_OUTPUT"
         env:
           VERSION_NUM: ${{ needs.build-artifacts.outputs.version_num }}
@@ -139,6 +144,8 @@ jobs:
           file: docker/python-run.Dockerfile
           push: true
           tags: ${{ steps.docker-tags.outputs.tags }}
+          build-args: |
+            BUILD_VERSION=${{ steps.docker-tags.outputs.version }}
   
   create-release:
     runs-on: ubuntu-latest
