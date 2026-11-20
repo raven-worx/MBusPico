@@ -48,6 +48,19 @@ jobs:
           VERSION_REF: ${{ github.ref }}
         shell: bash
         id: version
+      
+      # Home Assistant installs the add-on from the image tag matching the add-on version
+      - name: Check Home Assistant add-on version
+        if: ${{ steps.version.outputs.version != 'v0.0' }}
+        run: |
+          addon_version=$(sed -n -E 's/^version:[[:space:]]*"?([^"[:space:]]*)"?[[:space:]]*$/\1/p' homeassistant/mbuspico/config.yaml)
+          if [[ "$addon_version" != "$VERSION_NUM" ]]; then
+            echo "::error file=homeassistant/mbuspico/config.yaml::Add-on version '$addon_version' does not match release version '$VERSION_NUM'"
+            exit 1
+          fi
+        env:
+          VERSION_NUM: ${{ steps.version.outputs.version_num }}
+        shell: bash
         
       - name: Create archive tar
         run: |
