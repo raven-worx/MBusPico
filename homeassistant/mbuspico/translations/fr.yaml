@@ -1,0 +1,54 @@
+configuration:
+  device:
+    name: Profil du compteur
+    description: Le type de votre compteur intelligent.
+  device_key:
+    name: Clé de l'appareil
+    description: Clé de déchiffrement des données du compteur (32 caractères hexadécimaux). Demandez-la à votre gestionnaire de réseau.
+  serial_port:
+    name: Port série
+    description: Le port série auquel le module M-Bus est connecté (p. ex. un adaptateur USB-série).
+  http_enabled:
+    name: Serveur HTTP
+    description: Fournit les dernières données du compteur au format JSON via HTTP. Modifiez le port dans la section Réseau ci-dessous.
+  http_auth_user:
+    name: Nom d'utilisateur HTTP
+    description: Nom d'utilisateur requis pour lire les données du compteur via HTTP. Laissez le nom d'utilisateur et le mot de passe vides pour désactiver l'authentification.
+  http_auth_password:
+    name: Mot de passe HTTP
+    description: Mot de passe requis pour lire les données du compteur via HTTP.
+  udp_enabled:
+    name: Envoi UDP
+    description: Envoie les données du compteur au format JSON à un récepteur UDP (p. ex. un Miniserver Loxone).
+  udp_receiver_host:
+    name: Adresse du récepteur UDP
+    description: Adresse réseau ou nom d'hôte du récepteur UDP.
+  udp_receiver_port:
+    name: Port du récepteur UDP
+    description: Port sur lequel le récepteur UDP écoute.
+  udp_interval:
+    name: Intervalle d'envoi UDP
+    description: Intervalle en secondes auquel les données du compteur sont envoyées via UDP.
+  mqtt_enabled:
+    name: MQTT
+    description: Publie les données du compteur sur un broker MQTT.
+  mqtt_broker_address:
+    name: Adresse du broker MQTT
+    description: Laissez vide pour utiliser le broker MQTT de Home Assistant (Mosquitto broker).
+  mqtt_broker_port:
+    name: Port du broker MQTT
+    description: Non utilisé lorsque le broker MQTT de Home Assistant est utilisé.
+  mqtt_user:
+    name: Nom d'utilisateur MQTT
+    description: Non utilisé lorsque le broker MQTT de Home Assistant est utilisé.
+  mqtt_password:
+    name: Mot de passe MQTT
+    description: Non utilisé lorsque le broker MQTT de Home Assistant est utilisé.
+  mqtt_topic_prefix:
+    name: Préfixe des topics MQTT
+    description: Préfixe des topics MQTT sur lesquels les valeurs du compteur sont publiées.
+  ha_mqtt_discovery:
+    name: Capteurs Home Assistant
+    description: Crée automatiquement des capteurs Home Assistant pour les valeurs du compteur (MQTT discovery).
+network:
+  80/tcp: Point d'accès HTTP (dernières données du compteur en JSON)

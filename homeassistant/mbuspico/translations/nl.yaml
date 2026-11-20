@@ -1,0 +1,54 @@
+configuration:
+  device:
+    name: Meterprofiel
+    description: Het type van je slimme meter.
+  device_key:
+    name: Apparaatsleutel
+    description: Sleutel om de meterdata te ontsleutelen (32 hexadecimale tekens). Vraag deze aan bij je netbeheerder.
+  serial_port:
+    name: Seriële poort
+    description: De seriële poort waarop de M-Bus-module is aangesloten (bijv. een USB-serieel-adapter).
+  http_enabled:
+    name: HTTP-server
+    description: Stelt de laatste meterdata beschikbaar als JSON via HTTP. Wijzig de poort hieronder in de sectie Netwerk.
+  http_auth_user:
+    name: HTTP-gebruikersnaam
+    description: Gebruikersnaam die nodig is om de meterdata via HTTP te lezen. Laat gebruikersnaam en wachtwoord leeg om authenticatie uit te schakelen.
+  http_auth_password:
+    name: HTTP-wachtwoord
+    description: Wachtwoord dat nodig is om de meterdata via HTTP te lezen.
+  udp_enabled:
+    name: UDP-verzending
+    description: Verstuurt de meterdata als JSON naar een UDP-ontvanger (bijv. een Loxone Miniserver).
+  udp_receiver_host:
+    name: Adres UDP-ontvanger
+    description: Netwerkadres of hostnaam van de UDP-ontvanger.
+  udp_receiver_port:
+    name: Poort UDP-ontvanger
+    description: Poort waarop de UDP-ontvanger luistert.
+  udp_interval:
+    name: UDP-verzendinterval
+    description: Interval in seconden waarmee de meterdata via UDP wordt verstuurd.
+  mqtt_enabled:
+    name: MQTT
+    description: Publiceert de meterdata op een MQTT-broker.
+  mqtt_broker_address:
+    name: Adres MQTT-broker
+    description: Laat leeg om de MQTT-broker van Home Assistant (Mosquitto broker) te gebruiken.
+  mqtt_broker_port:
+    name: Poort MQTT-broker
+    description: Wordt niet gebruikt als de MQTT-broker van Home Assistant wordt gebruikt.
+  mqtt_user:
+    name: MQTT-gebruikersnaam
+    description: Wordt niet gebruikt als de MQTT-broker van Home Assistant wordt gebruikt.
+  mqtt_password:
+    name: MQTT-wachtwoord
+    description: Wordt niet gebruikt als de MQTT-broker van Home Assistant wordt gebruikt.
+  mqtt_topic_prefix:
+    name: MQTT-topicprefix
+    description: Prefix van de MQTT-topics waarop de meterwaarden worden gepubliceerd.
+  ha_mqtt_discovery:
+    name: Home Assistant-sensoren
+    description: Maakt automatisch Home Assistant-sensoren aan voor de meterwaarden (MQTT discovery).
+network:
+  80/tcp: HTTP-endpoint (laatste meterdata als JSON)
