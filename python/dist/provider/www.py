@@ -33,7 +33,6 @@ def _set_default_response_headers(response):
 async def authenticate(request):
 	if _AUTH_BASIC != "":
 		if "Authorization" in request.headers:
-			print(request.headers["Authorization"],("Basic "+_AUTH_BASIC))
 			if request.headers["Authorization"] != ("Basic "+_AUTH_BASIC):
 				return 'Forbidden', 403
 		else:
