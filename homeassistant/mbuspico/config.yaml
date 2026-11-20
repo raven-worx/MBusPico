@@ -1,0 +1,48 @@
+# Home Assistant add-on configuration
+# The add-on uses the prebuilt multi-arch image ravenworx/mbuspico:<version>,
+# so "version" must match a published image tag (checked by the release workflow).
+name: MBusPico
+version: "3.1"
+slug: mbuspico
+description: Reads smart meter data via M-Bus and provides it via MQTT (with Home Assistant sensors), HTTP and UDP
+url: https://github.com/raven-worx/MBusPico
+arch:
+  - amd64
+  - aarch64
+image: ravenworx/mbuspico
+uart: true
+services:
+  - mqtt:want
+ports:
+  80/tcp: 8080
+ports_description:
+  80/tcp: HTTP endpoint (latest meter data as JSON)
+options:
+  device: KAIFA_MA309M_NETZNOE
+  device_key: null
+  serial_port: null
+  http_enabled: true
+  udp_enabled: false
+  udp_interval: 30
+  mqtt_enabled: false
+  mqtt_broker_port: 1883
+  mqtt_topic_prefix: MBusPico
+  ha_mqtt_discovery: true
+schema:
+  device: list(KAIFA_MA309M_NETZNOE|SAGEMCOM_T210D)
+  device_key: password
+  serial_port: device(subsystem=tty)
+  http_enabled: bool
+  http_auth_user: str?
+  http_auth_password: password?
+  udp_enabled: bool
+  udp_receiver_host: str?
+  udp_receiver_port: port?
+  udp_interval: int(5,)
+  mqtt_enabled: bool
+  mqtt_broker_address: str?
+  mqtt_broker_port: port
+  mqtt_user: str?
+  mqtt_password: password?
+  mqtt_topic_prefix: str
+  ha_mqtt_discovery: bool

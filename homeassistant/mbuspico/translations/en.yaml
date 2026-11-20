@@ -1,0 +1,54 @@
+configuration:
+  device:
+    name: Meter profile
+    description: The type of your smart meter.
+  device_key:
+    name: Device key
+    description: Key to decrypt the meter data (32 hex characters). Request it from your power grid operator.
+  serial_port:
+    name: Serial port
+    description: The serial port the M-Bus module is connected to (e.g. a USB serial adapter).
+  http_enabled:
+    name: HTTP server
+    description: Provide the latest meter data as JSON via HTTP. Change the port in the Network section below.
+  http_auth_user:
+    name: HTTP username
+    description: Username required to read the meter data via HTTP. Leave username and password empty to disable authentication.
+  http_auth_password:
+    name: HTTP password
+    description: Password required to read the meter data via HTTP.
+  udp_enabled:
+    name: UDP sender
+    description: Send the meter data as JSON to a UDP receiver (e.g. a Loxone Miniserver).
+  udp_receiver_host:
+    name: UDP receiver address
+    description: Network address or hostname of the UDP receiver.
+  udp_receiver_port:
+    name: UDP receiver port
+    description: Port the UDP receiver is listening on.
+  udp_interval:
+    name: UDP send interval
+    description: Interval in seconds the meter data is sent via UDP.
+  mqtt_enabled:
+    name: MQTT
+    description: Publish the meter data to an MQTT broker.
+  mqtt_broker_address:
+    name: MQTT broker address
+    description: Leave empty to use the MQTT broker of Home Assistant (Mosquitto broker).
+  mqtt_broker_port:
+    name: MQTT broker port
+    description: Not used when the MQTT broker of Home Assistant is used.
+  mqtt_user:
+    name: MQTT username
+    description: Not used when the MQTT broker of Home Assistant is used.
+  mqtt_password:
+    name: MQTT password
+    description: Not used when the MQTT broker of Home Assistant is used.
+  mqtt_topic_prefix:
+    name: MQTT topic prefix
+    description: Prefix of the MQTT topics the meter values are published to.
+  ha_mqtt_discovery:
+    name: Home Assistant sensors
+    description: Create Home Assistant sensors for the meter values automatically (MQTT discovery).
+network:
+  80/tcp: HTTP endpoint (latest meter data as JSON)

@@ -1,0 +1,5 @@
+# Home Assistant add-on repository
+# Add https://github.com/raven-worx/MBusPico to the add-on store to install the add-on in homeassistant/mbuspico
+name: MBusPico
+url: https://github.com/raven-worx/MBusPico
+maintainer: raven-worx
