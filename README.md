@@ -165,6 +165,20 @@ ampy --port <PORT> put config.py
 ampy --port <PORT> put main.py
 ```
 
+# Home Assistant add-on
+
+MBusPico can run as add-on on Home Assistant OS (or any Home Assistant installation with add-on support).
+The M-Bus module is then connected directly to the Home Assistant machine (e.g. via a USB serial adapter), and the meter values appear as Home Assistant sensors via MQTT.
+
+[![Open your Home Assistant instance and show the add add-on repository dialog with this repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fraven-worx%2FMBusPico)
+
+1. Add this repository to the add-on store: **Settings → Add-ons → Add-on store → ⋮ → Repositories** → `https://github.com/raven-worx/MBusPico`
+2. Install the **MBusPico** add-on and set the options on its **Configuration** tab.
+
+The add-on options correspond to the settings in `python/dist/config.py`. See the [add-on documentation](homeassistant/mbuspico/DOCS.md) for details.
+
+When running the Docker image standalone (not as add-on) and Home Assistant uses the same MQTT broker, set `MBUSPICO_HA_MQTT_DISCOVERY=true` to have the Home Assistant sensors created as well.
+
 # HTTP endpoints
 
 When built with `MBUSPICO_HTTP_ENABLED` option enabled the following HTTP endpoints are provided.

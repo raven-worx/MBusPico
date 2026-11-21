@@ -1,0 +1,54 @@
+configuration:
+  device:
+    name: Zählerprofil
+    description: Der Typ deines Smart Meters.
+  device_key:
+    name: Geräteschlüssel
+    description: Schlüssel zum Entschlüsseln der Zählerdaten (32 Hex-Zeichen). Du erhältst ihn von deinem Netzbetreiber.
+  serial_port:
+    name: Serielle Schnittstelle
+    description: Die serielle Schnittstelle, an der das M-Bus-Modul angeschlossen ist (z. B. ein USB-Seriell-Adapter).
+  http_enabled:
+    name: HTTP-Server
+    description: Stellt die aktuellen Zählerdaten als JSON über HTTP bereit. Den Port kannst du unten im Abschnitt Netzwerk ändern.
+  http_auth_user:
+    name: HTTP-Benutzername
+    description: Benutzername zum Abrufen der Zählerdaten über HTTP. Benutzername und Passwort leer lassen, um die Anmeldung zu deaktivieren.
+  http_auth_password:
+    name: HTTP-Passwort
+    description: Passwort zum Abrufen der Zählerdaten über HTTP.
+  udp_enabled:
+    name: UDP-Versand
+    description: Sendet die Zählerdaten als JSON an einen UDP-Empfänger (z. B. einen Loxone Miniserver).
+  udp_receiver_host:
+    name: UDP-Empfängeradresse
+    description: Netzwerkadresse oder Hostname des UDP-Empfängers.
+  udp_receiver_port:
+    name: UDP-Empfängerport
+    description: Port, auf dem der UDP-Empfänger lauscht.
+  udp_interval:
+    name: UDP-Sendeintervall
+    description: Intervall in Sekunden, in dem die Zählerdaten per UDP gesendet werden.
+  mqtt_enabled:
+    name: MQTT
+    description: Veröffentlicht die Zählerdaten auf einem MQTT-Broker.
+  mqtt_broker_address:
+    name: MQTT-Broker-Adresse
+    description: Leer lassen, um den MQTT-Broker von Home Assistant (Mosquitto broker) zu verwenden.
+  mqtt_broker_port:
+    name: MQTT-Broker-Port
+    description: Wird nicht verwendet, wenn der MQTT-Broker von Home Assistant genutzt wird.
+  mqtt_user:
+    name: MQTT-Benutzername
+    description: Wird nicht verwendet, wenn der MQTT-Broker von Home Assistant genutzt wird.
+  mqtt_password:
+    name: MQTT-Passwort
+    description: Wird nicht verwendet, wenn der MQTT-Broker von Home Assistant genutzt wird.
+  mqtt_topic_prefix:
+    name: MQTT-Topic-Präfix
+    description: Präfix der MQTT-Topics, unter denen die Zählerwerte veröffentlicht werden.
+  ha_mqtt_discovery:
+    name: Home-Assistant-Sensoren
+    description: Legt für die Zählerwerte automatisch Sensoren in Home Assistant an (MQTT Discovery).
+network:
+  80/tcp: HTTP-Endpunkt (aktuelle Zählerdaten als JSON)

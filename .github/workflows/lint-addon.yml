@@ -1,0 +1,29 @@
+name: Lint Home Assistant add-on
+
+on:
+  push:
+    paths:
+      - 'homeassistant/**'
+      - 'repository.yaml'
+      - '.github/workflows/lint-addon.yml'
+  pull_request:
+    paths:
+      - 'homeassistant/**'
+      - 'repository.yaml'
+      - '.github/workflows/lint-addon.yml'
+  # Allows to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Add-on configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # validates homeassistant/mbuspico/config.yaml against the Home Assistant add-on schema
+      - name: Run Home Assistant add-on linter
+        uses: frenck/action-app-linter@v2
+        with:
+          path: ./homeassistant/mbuspico

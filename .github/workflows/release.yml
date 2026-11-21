@@ -4,21 +4,25 @@ on:
   push:
     tags:
       - 'v*.*'
-  # Allows to run this workflow manually from the Actions tab
+  # Allows to run this workflow manually from the Actions tab ("Run workflow")
   workflow_dispatch:
     inputs:
       create_release:
-        description: 'Create Release (`true`, `false`, or `draft`)'
-        required: false
+        description: "GitHub release with the build archives: 'true' = published, 'draft' = draft. Select a version tag (e.g. v3.1) under 'Use workflow from'. A run from a version tag always creates a release, even with 'false'."
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+          - 'draft'
         default: 'false'
       docker_image_tag:
-        description: 'Docker image tag for manual runs'
-        required: false
+        description: "Tag of the Docker image this run pushes: ravenworx/mbuspico:<tag>. Only releases started by pushing a version tag use the version (e.g. 3.1) instead. To try the image as Home Assistant add-on, set the version in homeassistant/mbuspico/config.yaml to this tag."
+        type: string
         default: 'devtest'
       docker_push_latest:
-        description: 'Also push `latest` on manual runs (`true` or `false`)'
-        required: false
-        default: 'false'
+        description: "Also push this image as ravenworx/mbuspico:latest, which Docker users get when they give no tag. The Home Assistant add-on is not affected, it uses the version tag."
+        type: boolean
+        default: false
 
 jobs:
   build-artifacts:
@@ -48,6 +52,19 @@ jobs:
           VERSION_REF: ${{ github.ref }}
         shell: bash
         id: version
+      
+      # Home Assistant installs the add-on from the image tag matching the add-on version
+      - name: Check Home Assistant add-on version
+        if: ${{ steps.version.outputs.version != 'v0.0' }}
+        run: |
+          addon_version=$(sed -n -E 's/^version:[[:space:]]*"?([^"[:space:]]*)"?[[:space:]]*$/\1/p' homeassistant/mbuspico/config.yaml)
+          if [[ "$addon_version" != "$VERSION_NUM" ]]; then
+            echo "::error file=homeassistant/mbuspico/config.yaml::Add-on version '$addon_version' does not match release version '$VERSION_NUM'"
+            exit 1
+          fi
+        env:
+          VERSION_NUM: ${{ steps.version.outputs.version_num }}
+        shell: bash
         
       - name: Create archive tar
         run: |
@@ -125,6 +142,11 @@ jobs:
               fi
             fi
             echo 'EOF'
+            if [[ "$GITHUB_EVENT_NAME" == "push" && "$VERSION_NUM" != "0.0" ]]; then
+              echo "version=${VERSION_NUM}"
+            else
+              echo "version=${DOCKER_IMAGE_TAG}"
+            fi
           } >> "$GITHUB_OUTPUT"
         env:
           VERSION_NUM: ${{ needs.build-artifacts.outputs.version_num }}
@@ -139,6 +161,8 @@ jobs:
           file: docker/python-run.Dockerfile
           push: true
           tags: ${{ steps.docker-tags.outputs.tags }}
+          build-args: |
+            BUILD_VERSION=${{ steps.docker-tags.outputs.version }}
   
   create-release:
     runs-on: ubuntu-latest
