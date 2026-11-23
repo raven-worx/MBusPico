@@ -3,14 +3,16 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/raven-worx/mbuspico?logo=github&sort=semver)](https://github.com/raven-worx/mbuspico/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](/LICENSE)
 
-> **NEW IN VERSION 2.0: ADDED MICROPYTHON AND PYTHON SUPPORT. RASPBERRY PI IS NOW SUPPORTED. ADDED READY-TO-USE DOCKER IMAGE**
+> **NEW IN VERSION 3.1**: ADDED HOMEASSISTANT ADDON SUPPORT
+
+> **NEW IN VERSION 2.0**: ADDED MICROPYTHON AND PYTHON SUPPORT. RASPBERRY PI IS NOW SUPPORTED. ADDED READY-TO-USE DOCKER IMAGE
 
 This project was created mostly out of interest and the wish to read out and display my power meter data in my Loxone smart home setup. (Thus the option with the 24V power supply - see below)
 
 Currently the following smart meter devices are supported:
 
-* **Kaifa MA309M** (Netz NÖ / EVN style M-Bus telegram)
-* **Sagemcom T210-D** (Netz NÖ / EVN style M-Bus telegram)
+* **Kaifa MA309M** (NetzNÖ style M-Bus telegram)
+* **Sagemcom T210-D** (NetzNÖ style M-Bus telegram)
 
 Credits for the Kaifa data intepretation code goes out to **[firegore/esphome-dlms-meter](https://github.com/firegore/esphome-dlms-meter)**!
 
