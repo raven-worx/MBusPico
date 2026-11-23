@@ -168,7 +168,10 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-artifacts
-    if: ${{ needs.build-artifacts.outputs.version != 'v0.0' || (github.event.inputs && contains('true draft', github.event.inputs.create_release)) }}
+    # only from a tag: started from a branch, the release action would create a tag named after the branch
+    if: ${{ github.ref_type == 'tag' && (needs.build-artifacts.outputs.version != 'v0.0' || (github.event.inputs && contains('true draft', github.event.inputs.create_release))) }}
+    permissions:
+      contents: write # create the release and upload the archives
     steps:
       - uses: actions/checkout@v7
       
@@ -178,19 +181,6 @@ jobs:
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Create Release
-        id: create-release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: MBusPico ${{needs.build-artifacts.outputs.version}}
-          body: |
-            ${{ steps.changelog.outputs.changelog }}
-          draft: ${{ github.event.inputs && github.event.inputs.create_release == 'draft' }}
-          prerelease: false
-        
       - name: Download tar-archive artifact
         uses: actions/download-artifact@v8
         with:
@@ -209,32 +199,26 @@ jobs:
           name: artifact-archive-python
           path: dist
         
-      - name: Upload archive tar artifact
-        uses: actions/upload-release-asset@v1
+      - name: Name the archives after the version
+        run: |
+          mv dist/mbuspico.tar.gz "dist/$ARCHIVE_TAR"
+          mv dist/mbuspico.zip "dist/$ARCHIVE_ZIP"
+          mv dist/python.zip "dist/$ARCHIVE_PYTHON"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: dist/mbuspico.tar.gz
-          asset_name: ${{ needs.build-artifacts.outputs.archive_filename_tar }}
-          asset_content_type: application/gzip
+          ARCHIVE_TAR: ${{ needs.build-artifacts.outputs.archive_filename_tar }}
+          ARCHIVE_ZIP: ${{ needs.build-artifacts.outputs.archive_filename_zip }}
+          ARCHIVE_PYTHON: ${{ needs.build-artifacts.outputs.archive_filename_python }}
         
-      - name: Upload archive zip artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
         with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: dist/mbuspico.zip
-          asset_name: ${{ needs.build-artifacts.outputs.archive_filename_zip }}
-          asset_content_type: application/zip
-        
-      - name: Upload python artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: dist/python.zip
-          asset_name: ${{ needs.build-artifacts.outputs.archive_filename_python }}
-          asset_content_type: application/zip
+          tag_name: ${{ github.ref_name }}
+          name: MBusPico ${{needs.build-artifacts.outputs.version}}
+          body: |
+            ${{ steps.changelog.outputs.changelog }}
+          draft: ${{ github.event.inputs && github.event.inputs.create_release == 'draft' }}
+          prerelease: false
+          files: |
+            dist/${{ needs.build-artifacts.outputs.archive_filename_tar }}
+            dist/${{ needs.build-artifacts.outputs.archive_filename_zip }}
+            dist/${{ needs.build-artifacts.outputs.archive_filename_python }}
