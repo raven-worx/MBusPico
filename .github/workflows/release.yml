@@ -34,7 +34,7 @@ jobs:
       archive_filename_zip: mbuspico_${{ steps.version.outputs.version }}.zip
       archive_filename_python: mbuspico_python_${{ steps.version.outputs.version }}.zip
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -75,7 +75,7 @@ jobs:
           ARCHIVE_NAME: mbuspico.tar.gz
         id: create-archive-tar
       - name: Upload tar-archive artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: artifact-archive-tar
           path: dist/mbuspico.tar.gz
@@ -89,7 +89,7 @@ jobs:
           ARCHIVE_NAME: mbuspico.zip
         id: create-archive-zip
       - name: Upload zip-archive artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: artifact-archive-zip
           path: dist/mbuspico.zip
@@ -102,7 +102,7 @@ jobs:
           ARCHIVE_NAME: python.zip
         id: create-python-zip
       - name: Upload ypthon archive artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: artifact-archive-python
           path: dist/python.zip
@@ -113,16 +113,16 @@ jobs:
       - build-artifacts
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
       
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v4
       
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v4
       
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -154,7 +154,7 @@ jobs:
           DOCKER_PUSH_LATEST: ${{ github.event.inputs.docker_push_latest || 'false' }}
          
       - name: Build and push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
@@ -170,11 +170,11 @@ jobs:
       - build-artifacts
     if: ${{ needs.build-artifacts.outputs.version != 'v0.0' || (github.event.inputs && contains('true draft', github.event.inputs.create_release)) }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       
       - name: Generate Changelog
         id: changelog
-        uses: metcalfc/changelog-generator@v4.1.0
+        uses: metcalfc/changelog-generator@v4.9.1
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
       
@@ -192,19 +192,19 @@ jobs:
           prerelease: false
         
       - name: Download tar-archive artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: artifact-archive-tar
           path: dist
         
       - name: Download zip-archive artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: artifact-archive-zip
           path: dist
         
       - name: Download python artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: artifact-archive-python
           path: dist
