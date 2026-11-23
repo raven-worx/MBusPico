@@ -7,6 +7,7 @@ else:
 	import asyncio
 	import json
 	import os
+	import time
 	import urllib.request
 	import paho.mqtt.publish as publish
 
@@ -14,11 +15,13 @@ else:
 _SUPERVISOR_MQTT_SERVICE_URL = "http://supervisor/services/mqtt"
 # topic prefix Home Assistant listens on for MQTT discovery
 _HA_DISCOVERY_PREFIX = "homeassistant"
+# interval to announce the sensors again, in case the broker lost the retained announcements
+_HA_DISCOVERY_INTERVAL_S = 3600
 
 # broker connection settings resolved by setup(); None if MQTT can not be used
 _BROKER = None
-# whether the Home Assistant discovery config was published
-_DISCOVERY_PUBLISHED = False
+# time.monotonic() of the last published Home Assistant discovery config; None if not published yet
+_DISCOVERY_PUBLISHED_AT = None
 
 # meter values announced to Home Assistant: (field, name, unit, device class, state class)
 _HA_SENSORS = [
@@ -145,7 +148,7 @@ def _ha_discovery_messages(meterdata, prefix, config):
 
 
 async def Send(meterdata, config):
-	global _DISCOVERY_PUBLISHED
+	global _DISCOVERY_PUBLISHED_AT
 	if sys.implementation.name == "micropython" or _BROKER is None:
 		return
 
@@ -174,8 +177,10 @@ async def Send(meterdata, config):
 		{'topic':prefix+"meterNumber", 'payload':meterdata.meterNumber, 'qos':0, 'retain':False}
 	]
 	
-	# announce the sensors to Home Assistant once (retained, so Home Assistant gets them after a restart too)
-	announce = config.MBUSPICO_HA_MQTT_DISCOVERY and not _DISCOVERY_PUBLISHED
+	# announce the sensors to Home Assistant (retained, so Home Assistant gets them after a restart too).
+	# Repeated from time to time, in case the broker lost them; Home Assistant ignores unchanged announcements.
+	now = time.monotonic()
+	announce = config.MBUSPICO_HA_MQTT_DISCOVERY and (_DISCOVERY_PUBLISHED_AT is None or now - _DISCOVERY_PUBLISHED_AT >= _HA_DISCOVERY_INTERVAL_S)
 	if announce:
 		msgs = _ha_discovery_messages(meterdata, prefix, config) + msgs
 
@@ -186,6 +191,7 @@ async def Send(meterdata, config):
 		return
 
 	if announce:
-		_DISCOVERY_PUBLISHED = True
-		print("MQTT: published Home Assistant discovery")
+		if _DISCOVERY_PUBLISHED_AT is None:
+			print("MQTT: published Home Assistant discovery")
+		_DISCOVERY_PUBLISHED_AT = now
 
