@@ -2,7 +2,7 @@
 # The add-on uses the prebuilt multi-arch image ravenworx/mbuspico:<version>,
 # so "version" must match a published image tag (checked by the release workflow).
 name: MBusPico
-version: "3.1"
+version: "3.2"
 slug: mbuspico
 description: Reads smart meter data via M-Bus and provides it via MQTT (with Home Assistant sensors), HTTP and UDP
 url: https://github.com/raven-worx/MBusPico

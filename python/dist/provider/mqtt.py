@@ -7,6 +7,7 @@ else:
 	import asyncio
 	import json
 	import os
+	import time
 	import urllib.request
 	import paho.mqtt.publish as publish
 
@@ -14,11 +15,13 @@ else:
 _SUPERVISOR_MQTT_SERVICE_URL = "http://supervisor/services/mqtt"
 # topic prefix Home Assistant listens on for MQTT discovery
 _HA_DISCOVERY_PREFIX = "homeassistant"
+# interval to announce the sensors again, in case the broker lost the retained announcements
+_HA_DISCOVERY_INTERVAL_S = 3600
 
 # broker connection settings resolved by setup(); None if MQTT can not be used
 _BROKER = None
-# meter number the Home Assistant discovery config was last published for
-_DISCOVERY_PUBLISHED_FOR = None
+# time.monotonic() of the last published Home Assistant discovery config; None if not published yet
+_DISCOVERY_PUBLISHED_AT = None
 
 # meter values announced to Home Assistant: (field, name, unit, device class, state class)
 _HA_SENSORS = [
@@ -109,16 +112,20 @@ def _ha_id(text):
 
 
 def _ha_discovery_messages(meterdata, prefix, config):
-	node_id = "mbuspico_" + _ha_id(meterdata.meterNumber)
+	# The ids are based on the topic prefix, not on the meter number: not every meter sends its number,
+	# and the prefix identifies this MBusPico on the broker anyway, as its values are published below it.
+	topic_id = _ha_id(prefix.strip("/")).lower()
+	node_id = "mbuspico" if topic_id in ("", "mbuspico") else "mbuspico_" + topic_id
 	manufacturer, model = _HA_DEVICE_MODELS.get(config.MBUSPICO_DEVICE.upper(), (None, config.MBUSPICO_DEVICE))
 	device = {
 		"identifiers": [node_id],
 		"name": "MBusPico",
 		"model": model,
-		"serial_number": meterdata.meterNumber,
 	}
 	if manufacturer:
 		device["manufacturer"] = manufacturer
+	if meterdata.meterNumber:
+		device["serial_number"] = meterdata.meterNumber
 	origin = {"name": "MBusPico", "support_url": "https://github.com/raven-worx/MBusPico"}
 
 	msgs = []
@@ -141,7 +148,7 @@ def _ha_discovery_messages(meterdata, prefix, config):
 
 
 async def Send(meterdata, config):
-	global _DISCOVERY_PUBLISHED_FOR
+	global _DISCOVERY_PUBLISHED_AT
 	if sys.implementation.name == "micropython" or _BROKER is None:
 		return
 
@@ -170,11 +177,11 @@ async def Send(meterdata, config):
 		{'topic':prefix+"meterNumber", 'payload':meterdata.meterNumber, 'qos':0, 'retain':False}
 	]
 	
-	# announce the sensors to Home Assistant once per meter (retained, so Home Assistant gets them after a restart too).
-	# Requires the meter number, as it is part of the sensor ids.
-	discovery_for = None
-	if config.MBUSPICO_HA_MQTT_DISCOVERY and meterdata.meterNumber and meterdata.meterNumber != _DISCOVERY_PUBLISHED_FOR:
-		discovery_for = meterdata.meterNumber
+	# announce the sensors to Home Assistant (retained, so Home Assistant gets them after a restart too).
+	# Repeated from time to time, in case the broker lost them; Home Assistant ignores unchanged announcements.
+	now = time.monotonic()
+	announce = config.MBUSPICO_HA_MQTT_DISCOVERY and (_DISCOVERY_PUBLISHED_AT is None or now - _DISCOVERY_PUBLISHED_AT >= _HA_DISCOVERY_INTERVAL_S)
+	if announce:
 		msgs = _ha_discovery_messages(meterdata, prefix, config) + msgs
 
 	try:
@@ -183,7 +190,8 @@ async def Send(meterdata, config):
 		print("MQTT: publishing meter data failed:", e)
 		return
 
-	if discovery_for is not None:
-		_DISCOVERY_PUBLISHED_FOR = discovery_for
-		print("MQTT: published Home Assistant discovery for meter", discovery_for)
+	if announce:
+		if _DISCOVERY_PUBLISHED_AT is None:
+			print("MQTT: published Home Assistant discovery")
+		_DISCOVERY_PUBLISHED_AT = now
 
