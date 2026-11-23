@@ -17,8 +17,8 @@ _HA_DISCOVERY_PREFIX = "homeassistant"
 
 # broker connection settings resolved by setup(); None if MQTT can not be used
 _BROKER = None
-# meter number the Home Assistant discovery config was last published for
-_DISCOVERY_PUBLISHED_FOR = None
+# whether the Home Assistant discovery config was published
+_DISCOVERY_PUBLISHED = False
 
 # meter values announced to Home Assistant: (field, name, unit, device class, state class)
 _HA_SENSORS = [
@@ -109,16 +109,20 @@ def _ha_id(text):
 
 
 def _ha_discovery_messages(meterdata, prefix, config):
-	node_id = "mbuspico_" + _ha_id(meterdata.meterNumber)
+	# The ids are based on the topic prefix, not on the meter number: not every meter sends its number,
+	# and the prefix identifies this MBusPico on the broker anyway, as its values are published below it.
+	topic_id = _ha_id(prefix.strip("/")).lower()
+	node_id = "mbuspico" if topic_id in ("", "mbuspico") else "mbuspico_" + topic_id
 	manufacturer, model = _HA_DEVICE_MODELS.get(config.MBUSPICO_DEVICE.upper(), (None, config.MBUSPICO_DEVICE))
 	device = {
 		"identifiers": [node_id],
 		"name": "MBusPico",
 		"model": model,
-		"serial_number": meterdata.meterNumber,
 	}
 	if manufacturer:
 		device["manufacturer"] = manufacturer
+	if meterdata.meterNumber:
+		device["serial_number"] = meterdata.meterNumber
 	origin = {"name": "MBusPico", "support_url": "https://github.com/raven-worx/MBusPico"}
 
 	msgs = []
@@ -141,7 +145,7 @@ def _ha_discovery_messages(meterdata, prefix, config):
 
 
 async def Send(meterdata, config):
-	global _DISCOVERY_PUBLISHED_FOR
+	global _DISCOVERY_PUBLISHED
 	if sys.implementation.name == "micropython" or _BROKER is None:
 		return
 
@@ -170,11 +174,9 @@ async def Send(meterdata, config):
 		{'topic':prefix+"meterNumber", 'payload':meterdata.meterNumber, 'qos':0, 'retain':False}
 	]
 	
-	# announce the sensors to Home Assistant once per meter (retained, so Home Assistant gets them after a restart too).
-	# Requires the meter number, as it is part of the sensor ids.
-	discovery_for = None
-	if config.MBUSPICO_HA_MQTT_DISCOVERY and meterdata.meterNumber and meterdata.meterNumber != _DISCOVERY_PUBLISHED_FOR:
-		discovery_for = meterdata.meterNumber
+	# announce the sensors to Home Assistant once (retained, so Home Assistant gets them after a restart too)
+	announce = config.MBUSPICO_HA_MQTT_DISCOVERY and not _DISCOVERY_PUBLISHED
+	if announce:
 		msgs = _ha_discovery_messages(meterdata, prefix, config) + msgs
 
 	try:
@@ -183,7 +185,7 @@ async def Send(meterdata, config):
 		print("MQTT: publishing meter data failed:", e)
 		return
 
-	if discovery_for is not None:
-		_DISCOVERY_PUBLISHED_FOR = discovery_for
-		print("MQTT: published Home Assistant discovery for meter", discovery_for)
+	if announce:
+		_DISCOVERY_PUBLISHED = True
+		print("MQTT: published Home Assistant discovery")
 
