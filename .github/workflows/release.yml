@@ -166,8 +166,10 @@ jobs:
   
   create-release:
     runs-on: ubuntu-latest
+    # only release when the Docker image was pushed
     needs:
       - build-artifacts
+      - docker
     # only from a tag: started from a branch, the release action would create a tag named after the branch
     if: ${{ github.ref_type == 'tag' && (needs.build-artifacts.outputs.version != 'v0.0' || (github.event.inputs && contains('true draft', github.event.inputs.create_release))) }}
     permissions:
